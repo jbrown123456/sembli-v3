@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Sembli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FBF8F1;
+    --surface: #FFFFFF;
+    --surface-alt: #F4EFE2;
+    --ink: #1C1A16;
+    --ink-soft: #4A453B;
+    --muted: #8B8476;
+    --border: #E6DFCE;
+    --border-soft: #EFE8D6;
+    --brand: #E8D26A;
+    --brand-deep: #B89A2E;
+    --brand-soft: #F6EDB8;
+    --accent: #2D4A3A;
+    --accent-soft: #DCE5DC;
+    --danger: #B4432B;
+    --danger-soft: #F8E4DE;
+    --success: #3F6E4A;
+    --success-soft: #DCE9DC;
+    --f-display: 'Fraunces', 'Georgia', serif;
+    --f-sans: 'Inter', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: #E8E0D0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--f-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 393px;
+    height: 852px;
+    background: var(--bg);
+    border-radius: 52px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.08),
+      0 30px 80px rgba(0,0,0,0.25),
+      0 8px 24px rgba(0,0,0,0.12),
+      inset 0 0 0 1px rgba(255,255,255,0.4);
+  }
+
+  /* Screen system */
+  .screen {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(30px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .screen.slide-out {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    padding: 16px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+  .status-time {
+    font-family: var(--f-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .status-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .status-icons svg { color: var(--ink); }
+
+  /* Tab bar */
+  .tab-bar {
+    height: 82px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: opacity 0.15s;
+  }
+  .tab-item:active { opacity: 0.6; }
+  .tab-label {
+    font-family: var(--f-sans);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--muted);
+    transition: color 0.15s, font-weight 0.15s;
+  }
+  .tab-item.active .tab-label {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* Scroll area */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* Typography atoms */
+  .mono {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .display {
+    font-family: var(--f-display);
+    font-weight: 400;
+  }
+  .display-italic {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--brand-deep);
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--f-sans);
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Threshold mark logo */
+  .threshold { display: block; flex-shrink: 0; }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%;
+    background: var(--ink);
+    color: var(--bg);
+    border: 0;
+    border-radius: 999px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--f-sans);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+
+  .btn-ghost {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    border: 0;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--f-sans);
+  }
+
+  /* Cite superscript */
+  .cite {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 0 1px 0 2px;
+    vertical-align: super;
+  }
+
+  /* Source card */
+  .source-card {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 9px;
+    display: flex;
+    gap: 8px;
+  }
+  .source-n {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .source-title { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .source-url { font-family: var(--f-mono); font-size: 9.5px; color: var(--muted); margin-top: 2px; }
+
+  /* Chat bubbles */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 14px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chat-area::-webkit-scrollbar { display: none; }
+
+  .user-bubble {
+    align-self: flex-end;
+    max-width: 82%;
+  }
+  .user-bubble-inner {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 18px 18px 4px 18px;
+    padding: 10px 14px;
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+  .bot-row {
+    align-self: flex-start;
+    display: flex;
+    gap: 8px;
+    max-width: 90%;
+  }
+  .sembli-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--surface-alt);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .bot-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 18px 18px 18px;
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    flex: 1;
+  }
+  .highlight {
+    margin-top: 9px;
+    padding: 10px 12px;
+    background: var(--brand-soft);
+    border-radius: 10px;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .think-chip {
+    align-self: flex-start;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    padding-left: 34px;
+  }
+  .think-dots { display: flex; gap: 3px; }
+  .think-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--brand-deep);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .think-dot:nth-child(2) { animation-delay: 0.2s; }
+  .think-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  .chat-chips {
+    align-self: flex-start;
+    padding-left: 34px;
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-family: var(--f-sans);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .chip:hover { background: var(--surface-alt); }
+
+  /* Chat composer */
+  .composer {
+    padding: 10px 12px 10px;
+    background: var(--bg);
+    border-top: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .composer-inner {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 10px 14px;
+  }
+  .composer-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--ink);
+    font-family: var(--f-sans);
+    outline: none;
+  }
+  .composer-input::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: none;
+    display: grid;
+    place-items: center;
+    color: var(--bg);
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .send-btn:active { opacity: 0.7; }
+
+  /* Timeline */
+  .timeline-year {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .year-label {
+    width: 52px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .year-num {
+    font-family: var(--f-display);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .year-act {
+    font-family: var(--f-mono);
+    font-size: 8.5px;
+    color: var(--danger);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .year-items {
+    flex: 1;
+    padding-left: 14px;
+  }
+  .timeline-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .timeline-item.hot {
+    background: var(--danger-soft);
+    border-color: rgba(180,67,43,0.2);
+  }
+  .timeline-cost {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  /* Asset detail */
+  .life-bar-bg {
+    height: 7px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    overflow: hidden;
+  }
+  .life-bar-fill {
+    height: 100%;
+    background: var(--danger);
+    opacity: 0.7;
+    border-radius: 999px;
+    transition: width 0.6s ease;
+  }
+
+  .service-timeline { position: relative; margin-top: 10px; }
+  .service-line {
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+  .service-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .service-dot {
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .service-dot-inner {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+
+  /* Onboarding */
+  .onboarding-screen {
+    padding: 0 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding: 12px 0;
+  }
+  .progress-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.25s;
+  }
+  .progress-dot.active {
+    width: 20px;
+    border-radius: 3px;
+    background: var(--ink);
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .stat-val {
+    font-family: var(--f-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.6px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* Invite screen */
+  .invite-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  /* Onboarding chat step */
+  .ob-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 16px;
+  }
+
+  /* Back button */
+  .back-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--muted);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  /* User avatar circle */
+  .avatar-circle {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: grid;
+    place-items: center;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* Ask sembli CTA row */
+  .ask-cta {
+    width: 100%;
+    background: var(--ink);
+    color: var(--bg);
+    border: 0;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: opacity 0.15s;
+  }
+  .ask-cta:active { opacity: 0.85; }
+
+  /* Screen entry animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active .fade-up {
+    animation: fadeUp 0.35s ease both;
+  }
+  .screen.active .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .screen.active .fade-up:nth-child(2) { animation-delay: 0.1s; }
+  .screen.active .fade-up:nth-child(3) { animation-delay: 0.15s; }
+  .screen.active .fade-up:nth-child(4) { animation-delay: 0.2s; }
+  .screen.active .fade-up:nth-child(5) { animation-delay: 0.25s; }
+
+  /* Responsive — on small screens show full width */
+  @media (max-width: 440px) {
+    html, body { align-items: flex-start; background: var(--bg); }
+    .phone {
+      width: 100%;
+      height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: ONBOARDING
+  ══════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-onboarding">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity=".4"/><rect x="4" y="2" width="3" height="10" rx="1" opacity=".6"/><rect x="8" y="0" width="3" height="12" rx="1" opacity=".8"/><rect x="12" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C5.5 2.5 3.3 3.6 1.8 5.3L0 3.5C2 1.3 4.8 0 8 0s6 1.3 8 3.5L14.2 5.3C12.7 3.6 10.5 2.5 8 2.5z" opacity=".4"/><path d="M8 6C6.3 6 4.8 6.7 3.7 7.8L2 6.1C3.5 4.6 5.6 3.7 8 3.7s4.5.9 6 2.4L12.3 7.8C11.2 6.7 9.7 6 8 6z" opacity=".7"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <!-- Step tracker -->
+    <div id="ob-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+      <!-- Step 1: Welcome -->
+      <div id="ob-step-1" style="flex:1;display:flex;flex-direction:column;padding:0 24px 24px;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;margin-top:-20px;">
+          <svg width="56" height="56" viewBox="0 0 76 76" style="display:block;margin-bottom:28px;">
+            <rect x="10" y="62" width="56" height="6" rx="3" fill="var(--ink)"/>
+            <path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-family:var(--f-mono);font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sembli</div>
+          <h1 style="font-family:var(--f-display);font-weight:400;font-size:44px;letter-spacing:-1.5px;text-align:center;line-height:1.05;margin-bottom:16px;">
+            Your home,<br/><span style="font-style:italic;color:var(--brand-deep);">remembered.</span>
+          </h1>
+          <p style="font-size:15px;line-height:1.6;color:var(--ink-soft);text-align:center;max-width:280px;">
+            Track what you own, what needs attention, and what's coming — for any home you care about.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+        </div>
+        <button class="btn-primary" onclick="showObStep(2)">Get started</button>
+        <button class="btn-ghost" onclick="goToScreen('screen-dashboard')" style="margin-top:6px;">I already have an account</button>
+      </div>
+
+      <!-- Step 2: Address -->
+      <div id="ob-step-2" style="flex:1;display:flex;flex-direction:column;padding:0 24px 24px;display:none;">
+        <div style="flex:1;padding-top:8px;">
+          <div style="margin-bottom:28px;">
+            <div class="mono" style="margin-bottom:8px;">Step 1 of 3</div>
+            <h2 style="font-family:var(--f-display);font-size:34px;font-weight:400;letter-spacing:-1px;line-height:1.1;">
+              Which home are<br/>we starting with?
+            </h2>
+          </div>
+
+          <!-- Chat-style input -->
+          <div class="card" style="margin-bottom:12px;">
+            <div style="padding:16px;">
+              <div class="sembli-avatar" style="margin-bottom:12px;">
+                <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-size:14px;line-height:1.5;color:var(--ink);">What's the address? I'll use it to pull regional cost data and climate info for maintenance timing.</div>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+            <div class="mono" style="margin-bottom:6px;">Address</div>
+            <input type="text" placeholder="412 Oak St, Des Moines, IA" value="412 Oak St, Des Moines, IA 50312"
+              style="width:100%;border:none;background:transparent;font-size:15px;color:var(--ink);font-family:var(--f-sans);outline:none;"/>
+          </div>
+
+          <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;">
+            <div class="mono" style="margin-bottom:6px;">Whose home is this?</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+              <button onclick="selectOwner(this)" class="chip" style="background:var(--ink);color:var(--bg);border-color:var(--ink);">Mine</button>
+              <button onclick="selectOwner(this)" class="chip">A parent's</button>
+              <button onclick="selectOwner(this)" class="chip">A rental</button>
+              <button onclick="selectOwner(this)" class="chip">Other</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="progress-dot"></div>
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+        </div>
+        <button class="btn-primary" onclick="showObStep(3)">Continue →</button>
+      </div>
+
+      <!-- Step 3: First asset via chat -->
+      <div id="ob-step-3" style="flex:1;display:flex;flex-direction:column;padding:0;display:none;">
+        <div style="padding:12px 20px 10px;border-bottom:1px solid var(--border-soft);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="sembli-avatar">
+              <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;">Sembli</div>
+              <div style="font-size:11px;color:var(--muted);">Let's add your first item</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot active"></div>
+          </div>
+        </div>
+
+        <div class="chat-area" style="padding-bottom:0;">
+          <div class="bot-row">
+            <div class="sembli-avatar">
+              <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="bot-bubble">
+              Tell me about a major system in the home — your HVAC, water heater, roof, or appliances. What do you have?
+            </div>
+          </div>
+
+          <div class="chat-chips">
+            <button class="chip" onclick="obSelectAsset('HVAC / AC')">HVAC / AC</button>
+            <button class="chip" onclick="obSelectAsset('Water heater')">Water heater</button>
+            <button class="chip" onclick="obSelectAsset('Roof')">Roof</button>
+            <button class="chip" onclick="obSelectAsset('Appliances')">Appliances</button>
+          </div>
+
+          <div id="ob-asset-followup" style="display:none;">
+            <div class="user-bubble" style="align-self:flex-end;">
+              <div class="user-bubble-inner" id="ob-selected-asset">HVAC / AC</div>
+            </div>
+            <div class="bot-row">
+              <div class="sembli-avatar">
+                <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="bot-bubble">
+                Do you know the brand and approximate install year? Even a rough guess helps me flag when replacements are due.
+                <div class="highlight">e.g. "Carrier, 2006" or "not sure, maybe 10 yrs old"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer" style="padding-bottom:14px;">
+          <div class="composer-inner">
+            <input class="composer-input" id="ob-chat-input" placeholder="Brand, year, or 'not sure'…" onkeydown="if(event.key==='Enter')obChatSend()"/>
+            <button class="send-btn" onclick="obChatSend()">↑</button>
+          </div>
+          <button class="btn-primary" onclick="goToScreen('screen-dashboard')" style="margin-top:10px;border-radius:14px;font-size:14px;padding:12px;">Take me to my dashboard →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: DASHBOARD
+  ══════════════════════════════════════════════ -->
+  <div class="screen" id="screen-dashboard">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity=".4"/><rect x="4" y="2" width="3" height="10" rx="1" opacity=".6"/><rect x="8" y="0" width="3" height="12" rx="1" opacity=".8"/><rect x="12" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5C5.5 2.5 3.3 3.6 1.8 5.3L0 3.5C2 1.3 4.8 0 8 0s6 1.3 8 3.5L14.2 5.3C12.7 3.6 10.5 2.5 8 2.5z" opacity=".4"/><path d="M8 6C6.3 6 4.8 6.7 3.7 7.8L2 6.1C3.5 4.6 5.6 3.7 8 3.7s4.5.9 6 2.4L12.3 7.8C11.2 6.7 9.7 6 8 6z" opacity=".7"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="scroll-area" style="padding:8px 18px 0;">
+
+      <!-- Header -->
+      <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <svg class="threshold" width="28" height="28" viewBox="0 0 76 76">
+          <rect x="10" y="62" width="56" height="6" rx="3" fill="var(--ink)"/>
+          <path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="avatar-circle">J</div>
+      </div>
+
+      <!-- Greeting -->
+      <div class="fade-up" style="margin-bottom:18px;">
+        <div class="mono">Saturday · Apr 19</div>
+        <h1 style="font-family:var(--f-display);font-weight:400;font-size:42px;letter-spacing:-1.4px;margin-top:4px;line-height:1.0;">
+          Good morning,<br/><span style="font-style:italic;color:var(--brand-deep);">Jen.</span>
+        </h1>
+      </div>
+
+      <!-- Needs attention -->
+      <div class="card fade-up">
+        <div class="card-header">
+          <span class="mono" style="color:var(--ink);">Needs your eye</span>
+          <span style="font-size:11px;color:var(--muted);">2 items</span>
+        </div>
+        <div onclick="goToScreen('screen-asset')" style="padding:12px 16px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='var(--surface-alt)'" onmouseleave="this.style.background='transparent'">
+          <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--danger);"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;">Carrier AC</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:1px;">19 yrs old — plan for replacement</div>
+          </div>
+          <span class="badge" style="background:var(--danger-soft);color:var(--danger);">HVAC</span>
+        </div>
+        <div style="border-top:1px solid var(--border-soft);padding:12px 16px;display:flex;gap:12px;align-items:center;">
+          <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--brand-deep);"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;">HVAC filter</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:1px;">Due for replacement · last changed Oct</div>
+          </div>
+          <span class="badge" style="background:var(--brand-soft);color:var(--brand-deep);">Maint.</span>
+        </div>
+      </div>
+
+      <!-- Ask Sembli CTA -->
+      <button class="ask-cta fade-up" onclick="goToScreen('screen-chat')">
+        <svg width="22" height="22" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="6" rx="3" fill="var(--bg)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--bg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--bg);">Ask Sembli</div>
+          <div style="font-size:11.5px;color:rgba(251,248,241,0.5);margin-top:1px;">"Should I replace the AC before summer?"</div>
+        </div>
+        <span style="color:rgba(255,255,255,0.4);font-size:18px;">›</span>
+      </button>
+
+      <!-- This month -->
+      <div class="card fade-up">
+        <div class="card-header">
+          <span class="mono" style="color:var(--ink);">This month</span>
+        </div>
+        <div id="task-list">
+          <div style="padding:11px 16px;display:flex;align-items:center;gap:12px;border-top:none;">
+            <div onclick="toggleTask(this)" style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);background:transparent;display:grid;place-items:center;flex-shrink:0;cursor:pointer;transition:all 0.15s;"></div>
+            <div style="flex:1;font-size:13.5px;font-weight:500;">Schedule spring HVAC tune-up</div>
+            <span class="mono">Before May</span>
+          </div>
+          <div style="border-top:1px solid var(--border-soft);padding:11px 16px;display:flex;align-items:center;gap:12px;opacity:0.45;">
+            <div style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--success);background:var(--success-soft);display:grid;place-items:center;flex-shrink:0;">
+              <span style="color:var(--success);font-size:11px;font-weight:700;">✓</span>
+            </div>
+            <div style="flex:1;font-size:13.5px;font-weight:500;text-decoration:line-through;">Test smoke detectors</div>
+            <span class="mono">Apr 26</span>
+          </div>
+          <div style="border-top:1px solid var(--border-soft);padding:11px 16px;display:flex;align-items:center;gap:12px;">
+            <div onclick="toggleTask(this)" style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);background:transparent;display:grid;place-items:center;flex-shrink:0;cursor:pointer;transition:all 0.15s;"></div>
+            <div style="flex:1;font-size:13.5px;font-weight:500;">Check attic insulation</div>
+            <span class="mono">Apr 30</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Home at a glance -->
+      <div class="fade-up" style="background:var(--surface-alt);border-radius:18px;padding:14px 16px;margin-bottom:100px;">
+        <div class="mono">Mom's house</div>
+        <div style="font-family:var(--f-display);font-size:18px;font-weight:400;letter-spacing:-0.5px;margin-top:4px;margin-bottom:12px;">412 Oak St · Des Moines</div>
+        <div class="stats-grid">
+          <div class="stat-tile"><div class="stat-val">11</div><div class="stat-label">assets</div></div>
+          <div class="stat-tile"><div class="stat-val">3</div><div class="stat-label">watch-outs</div></div>
+          <div class="stat-tile" onclick="goToScreen('screen-timeline')" style="cursor:pointer;"><div class="stat-val">'27</div><div class="stat-label">next big cost</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item active" onclick="switchTab('home',this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Home</span>
+      </button>
+      <button class="tab-item" onclick="switchTab('chat',this);goToScreen('screen-chat')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Ask</span>
+      </button>
+      <button class="tab-item" onclick="switchTab('assets',this);goToScreen('screen-asset')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/></svg>
+        <span class="tab-label">Assets</span>
+      </button>
+      <button class="tab-item" onclick="switchTab('timeline',this);goToScreen('screen-timeline')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="var(--muted)" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="tab-label">Outlook</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: CHAT
+  ══════════════════════════════════════════════ -->
+  <div class="screen" id="screen-chat">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div style="padding:4px 16px 12px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <svg class="threshold" width="28" height="28" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="6" rx="3" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:600;">Ask Sembli</div>
+        <div style="font-size:11px;color:var(--muted);">Mom's house · Des Moines</div>
+      </div>
+      <button style="background:transparent;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:11px;color:var(--ink-soft);cursor:pointer;font-family:var(--f-sans);">History</button>
+    </div>
+
+    <div class="chat-area" id="chat-messages">
+      <div style="text-align:center;padding:2px 0 6px;"><span class="mono">Today · 9:42 am</span></div>
+
+      <div class="user-bubble">
+        <div class="user-bubble-inner">Should I replace the AC this year or wait? It's a 2006 Carrier.</div>
+      </div>
+
+      <div class="think-chip">
+        <div class="think-dots">
+          <div class="think-dot"></div><div class="think-dot"></div><div class="think-dot"></div>
+        </div>
+        <span class="mono">checking specs · regional costs · lifespan data</span>
+      </div>
+
+      <div class="bot-row">
+        <div class="sembli-avatar">
+          <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="bot-bubble">
+          At 19 years old, your mom's Carrier is <b>past</b> its expected 15–18 year lifespan<span class="cite">[1]</span> — but "replace now vs. wait" depends on a few things.
+          <div class="highlight">If it's still cooling well and the last tune-up was clean, <b>one more summer is reasonable</b> — but budget $7–10K and don't wait past fall 2026.</div>
+          Key signals to watch: refrigerant top-ups (means a leak), uneven cooling by room, or a repair quote over $2K<span class="cite">[2]</span> — any of these means replace, don't repair.
+          <div class="source-card">
+            <div class="source-n">[1]</div>
+            <div><div class="source-title">ENERGY STAR — Central AC lifespan</div><div class="source-url">energystar.gov</div></div>
+          </div>
+          <div class="source-card">
+            <div class="source-n">[2]</div>
+            <div><div class="source-title">ACCA — repair vs. replace rule of thumb</div><div class="source-url">acca.org</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-chips">
+        <button class="chip" onclick="sendChip(this,'Get 3 local quotes')">Get 3 local quotes</button>
+        <button class="chip" onclick="sendChip(this,'+ Add to outlook')">+ Add to outlook</button>
+        <button class="chip" onclick="sendChip(this,'What size do I need?')">What size do I need?</button>
+      </div>
+
+      <div class="user-bubble" id="chat-extra" style="display:none;">
+        <div class="user-bubble-inner" id="chat-extra-text"></div>
+      </div>
+      <div class="think-chip" id="chat-think-2" style="display:none;">
+        <div class="think-dots">
+          <div class="think-dot"></div><div class="think-dot"></div><div class="think-dot"></div>
+        </div>
+        <span class="mono">calculating · 1940 sq ft · Des Moines climate</span>
+      </div>
+      <div class="bot-row" id="chat-reply-2" style="display:none;">
+        <div class="sembli-avatar">
+          <svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="bot-bubble">
+          For a ~1,940 sq ft house in Des Moines (climate zone 5A), you're looking at <b>3.0–3.5 tons</b><span class="cite">[3]</span>.
+          <div class="highlight">Ask your contractor for a Manual J load calculation — any reputable installer will do this before sizing. It takes about 20 min.</div>
+          <div class="source-card">
+            <div class="source-n">[3]</div>
+            <div><div class="source-title">ACCA Manual J — residential load calc</div><div class="source-url">acca.org · zone 5A table</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="composer-inner">
+        <input class="composer-input" id="chat-input" placeholder="Ask anything about the house…" onkeydown="if(event.key==='Enter')sendChatMessage()"/>
+        <button class="send-btn" onclick="sendChatMessage()">↑</button>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="goToScreen('screen-dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Home</span>
+      </button>
+      <button class="tab-item active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)" stroke-linejoin="round"/></svg>
+        <span class="tab-label" style="color:var(--ink);font-weight:600;">Ask</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-asset')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/></svg>
+        <span class="tab-label">Assets</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-timeline')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="var(--muted)" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="tab-label">Outlook</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: ASSET DETAIL
+  ══════════════════════════════════════════════ -->
+  <div class="screen" id="screen-asset">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div style="padding:4px 18px 14px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button class="back-btn" onclick="goToScreen('screen-dashboard')">‹</button>
+        <span class="mono">HVAC · Asset</span>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 18px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--brand-soft);display:grid;place-items:center;flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="var(--brand-deep)"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12" stroke="var(--brand-deep)" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <span class="mono">Central Air</span>
+            <div style="font-family:var(--f-display);font-size:24px;font-weight:400;letter-spacing:-0.6px;margin-top:2px;line-height:1.1;">Carrier Infinity</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:3px;">24ANB648A003 · basement</div>
+          </div>
+          <span class="badge" style="background:var(--danger-soft);color:var(--danger);">Aging</span>
+        </div>
+
+        <!-- Life bar -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span class="mono">Life used</span>
+            <span class="mono" style="color:var(--ink-soft);">yr 19 of ~18</span>
+          </div>
+          <div class="life-bar-bg">
+            <div class="life-bar-fill" style="width:100%;"></div>
+          </div>
+        </div>
+
+        <div style="padding-top:12px;border-top:1px solid var(--border-soft);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div><span class="mono">Replace</span><div style="font-size:13.5px;font-weight:600;margin-top:3px;">'26–'28</div></div>
+          <div><span class="mono">Est. cost</span><div style="font-size:13.5px;font-weight:600;margin-top:3px;">$7–10K</div></div>
+          <div><span class="mono">Confidence</span><div style="font-size:13.5px;font-weight:600;margin-top:3px;">Medium</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-area" style="padding:0 18px 90px;">
+      <!-- Service history -->
+      <div style="margin-bottom:16px;">
+        <span class="mono">Service history</span>
+        <div class="service-timeline">
+          <div class="service-line"></div>
+          <div style="margin-top:10px;">
+            <div class="service-item">
+              <div class="service-dot" style="background:var(--success-soft);border:1.5px solid var(--success);">
+                <div class="service-dot-inner" style="background:var(--success);"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:600;">Annual tune-up</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:1px;">Dave · Hometown Heating</div>
+              </div>
+              <span class="mono">Apr 2024</span>
+            </div>
+            <div class="service-item">
+              <div class="service-dot" style="background:var(--danger-soft);border:1.5px solid var(--danger);">
+                <div class="service-dot-inner" style="background:var(--danger);"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:600;">Refrigerant top-up</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:1px;">Dave · Hometown Heating</div>
+                <div style="margin-top:5px;padding:6px 8px;background:var(--danger-soft);border-radius:7px;font-size:11.5px;color:var(--danger);">⚠ Refrigerant leak indicator — watch for repeat</div>
+              </div>
+              <span class="mono">Aug 2023</span>
+            </div>
+            <div class="service-item">
+              <div class="service-dot" style="background:var(--success-soft);border:1.5px solid var(--success);">
+                <div class="service-dot-inner" style="background:var(--success);"></div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:600;">Annual tune-up</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:1px;">Dave · Hometown Heating</div>
+              </div>
+              <span class="mono">Oct 2022</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ask inline -->
+      <button onclick="goToScreen('screen-chat')" style="width:100%;background:var(--surface-alt);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;transition:opacity 0.15s;" onmouseenter="this.style.opacity='0.8'" onmouseleave="this.style.opacity='1'">
+        <svg width="20" height="20" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="6" rx="3" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:13.5px;color:var(--ink-soft);font-family:var(--f-sans);">Ask Sembli about this AC…</span>
+        <span style="margin-left:auto;color:var(--muted);">›</span>
+      </button>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="goToScreen('screen-dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Home</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-chat')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Ask</span>
+      </button>
+      <button class="tab-item active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)"/></svg>
+        <span class="tab-label" style="color:var(--ink);font-weight:600;">Assets</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-timeline')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="var(--muted)" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="tab-label">Outlook</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: TIMELINE / OUTLOOK
+  ══════════════════════════════════════════════ -->
+  <div class="screen" id="screen-timeline">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div style="padding:4px 18px 14px;border-bottom:1px solid var(--border-soft);flex-shrink:0;">
+      <span class="mono">Mom's house · Des Moines</span>
+      <div style="font-family:var(--f-display);font-size:32px;font-weight:400;letter-spacing:-1px;margin-top:4px;">
+        10-Year <span style="font-style:italic;color:var(--brand-deep);">Outlook</span>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;">
+        <div class="stat-tile" style="flex:1;"><div class="stat-val">$27.8K</div><div class="stat-label">est. 10-yr</div></div>
+        <div class="stat-tile" style="flex:1;"><div class="stat-val">4</div><div class="stat-label">replacements</div></div>
+        <div class="stat-tile" style="flex:1;"><div class="stat-val">'26</div><div class="stat-label">first due</div></div>
+      </div>
+    </div>
+
+    <div class="scroll-area" style="padding:14px 18px 90px;">
+
+      <div class="timeline-year">
+        <div class="year-label">
+          <div class="year-num" style="color:var(--danger);">2026</div>
+          <div class="year-act">Act now</div>
+        </div>
+        <div class="year-items" style="border-left:1px solid rgba(180,67,43,0.3);">
+          <div class="timeline-item hot" onclick="goToScreen('screen-asset')" style="cursor:pointer;">
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">Carrier AC</div>
+              <span class="badge" style="background:var(--danger-soft);color:var(--danger);margin-top:4px;display:inline-flex;">HVAC</span>
+            </div>
+            <div class="timeline-cost">$8,500</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-year">
+        <div class="year-label">
+          <div class="year-num">2027</div>
+        </div>
+        <div class="year-items" style="border-left:1px solid var(--border);">
+          <div class="timeline-item">
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">Rheem water heater</div>
+              <span class="badge" style="background:var(--brand-soft);color:var(--brand-deep);margin-top:4px;display:inline-flex;">Plumbing</span>
+            </div>
+            <div class="timeline-cost">$1,800</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-year">
+        <div class="year-label">
+          <div class="year-num" style="color:var(--muted);">2029</div>
+        </div>
+        <div class="year-items" style="border-left:1px solid var(--border);">
+          <div style="font-size:13px;color:var(--muted);padding:6px 0;">Nothing forecasted</div>
+        </div>
+      </div>
+
+      <div class="timeline-year">
+        <div class="year-label">
+          <div class="year-num">2031</div>
+        </div>
+        <div class="year-items" style="border-left:1px solid var(--border);">
+          <div class="timeline-item">
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">Roof (asphalt)</div>
+              <span class="badge" style="background:var(--accent-soft);color:var(--accent);margin-top:4px;display:inline-flex;">Exterior</span>
+            </div>
+            <div class="timeline-cost">$14,000</div>
+          </div>
+          <div class="timeline-item" style="margin-top:0;">
+            <div style="flex:1;">
+              <div style="font-size:13.5px;font-weight:600;">Electrical panel</div>
+              <span class="badge" style="background:var(--brand-soft);color:var(--brand-deep);margin-top:4px;display:inline-flex;">Electrical</span>
+            </div>
+            <div class="timeline-cost">$3,500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer note -->
+      <div style="padding:12px 14px;background:var(--accent-soft);border-radius:12px;font-size:12.5px;color:var(--accent);line-height:1.5;display:flex;gap:10px;">
+        <span>♥</span>
+        <span style="font-family:var(--f-display);font-style:italic;">Estimates are based on typical Des Moines averages + your actual service history. Confirm AC install date for higher confidence.</span>
+      </div>
+
+      <!-- Invite button -->
+      <button onclick="goToScreen('screen-invite')" style="width:100%;margin-top:14px;background:transparent;border:1px solid var(--border);border-radius:14px;padding:12px 16px;font-size:13.5px;color:var(--ink-soft);font-family:var(--f-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span>👤</span> Invite a sibling as collaborator
+      </button>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-item" onclick="goToScreen('screen-dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Home</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-chat')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--muted)" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="tab-label">Ask</span>
+      </button>
+      <button class="tab-item" onclick="goToScreen('screen-asset')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="var(--muted)" stroke-width="1.8"/></svg>
+        <span class="tab-label">Assets</span>
+      </button>
+      <button class="tab-item active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="var(--ink)" stroke-width="1.8" fill="var(--brand-soft)"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="tab-label" style="color:var(--ink);font-weight:600;">Outlook</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN: INVITE / SIBLING
+  ══════════════════════════════════════════════ -->
+  <div class="screen" id="screen-invite">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div style="padding:4px 18px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <svg class="threshold" width="28" height="28" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="6" rx="3" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="background:var(--brand-soft);border:1px solid rgba(184,154,46,0.2);border-radius:999px;padding:5px 12px;font-family:var(--f-mono);font-size:10.5px;color:var(--brand-deep);letter-spacing:0.4px;">INVITED COLLABORATOR</span>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 28px;margin-top:-20px;">
+
+      <div class="invite-card fade-up">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <div class="avatar-circle" style="width:38px;height:38px;font-size:20px;">J</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">Jen invited you</div>
+            <div style="font-size:11.5px;color:var(--muted);">to Mom's house</div>
+          </div>
+        </div>
+
+        <div style="font-family:var(--f-display);font-size:28px;font-weight:400;letter-spacing:-0.8px;line-height:1.1;margin-bottom:12px;">
+          412 Oak St,<br/><span style="font-style:italic;color:var(--brand-deep);">Des Moines.</span>
+        </div>
+
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:20px;">
+          Jen has set up mom's home with 11 tracked items and a 10-year outlook. You're now a collaborator.
+        </p>
+
+        <button class="btn-primary" onclick="goToScreen('screen-dashboard')">Open Mom's home →</button>
+        <button class="btn-ghost" onclick="goToScreen('screen-dashboard')">Not now</button>
+      </div>
+
+      <div style="margin-top:20px;width:100%;">
+        <div class="mono" style="text-align:center;display:block;margin-bottom:10px;">You'll have access to</div>
+        <div style="display:flex;flex-direction:column;">
+          <div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--ink-soft);">
+            <span style="color:var(--muted);font-size:15px;">◈</span>11 tracked systems & appliances
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--ink-soft);">
+            <span style="color:var(--muted);font-size:15px;">☎</span>Dave's contact (HVAC vendor)
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--ink-soft);">
+            <span style="color:var(--muted);font-size:15px;">✎</span>Jen's notes and service records
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;padding:9px 0;font-size:13.5px;color:var(--ink-soft);">
+            <span style="color:var(--muted);font-size:15px;">◷</span>The 10-year cost outlook
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:20px;flex-shrink:0;"></div>
+  </div>
+
+</div><!-- end .phone -->
+
+<script>
+  // ── Navigation ──────────────────────────────────────────
+  let currentScreen = 'screen-onboarding';
+
+  function goToScreen(id) {
+    const prev = document.getElementById(currentScreen);
+    const next = document.getElementById(id);
+    if (!next || id === currentScreen) return;
+
+    prev.classList.add('slide-out');
+    setTimeout(() => {
+      prev.classList.remove('active', 'slide-out');
+    }, 200);
+
+    next.classList.add('active');
+    currentScreen = id;
+
+    // Scroll to top
+    const scroll = next.querySelector('.scroll-area, .chat-area');
+    if (scroll) scroll.scrollTop = 0;
+  }
+
+  // ── Onboarding ──────────────────────────────────────────
+  function showObStep(n) {
+    [1,2,3].forEach(i => {
+      const el = document.getElementById(`ob-step-${i}`);
+      el.style.display = i === n ? 'flex' : 'none';
+    });
+  }
+
+  function selectOwner(btn) {
+    btn.closest('div').querySelectorAll('button').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--ink)';
+      b.style.borderColor = 'var(--border)';
+    });
+    btn.style.background = 'var(--ink)';
+    btn.style.color = 'var(--bg)';
+    btn.style.borderColor = 'var(--ink)';
+  }
+
+  function obSelectAsset(label) {
+    document.getElementById('ob-selected-asset').textContent = label;
+    const followup = document.getElementById('ob-asset-followup');
+    followup.style.display = 'block';
+    // Hide chips
+    document.querySelector('.chat-chips').style.display = 'none';
+  }
+
+  function obChatSend() {
+    const input = document.getElementById('ob-chat-input');
+    const val = input.value.trim();
+    if (!val) return;
+    input.value = '';
+    goToScreen('screen-dashboard');
+  }
+
+  // ── Task toggle ──────────────────────────────────────────
+  function toggleTask(checkbox) {
+    const row = checkbox.closest('div');
+    const isDone = checkbox.style.background === 'var(--success-soft)';
+    if (isDone) {
+      checkbox.style.border = '1.5px solid var(--border)';
+      checkbox.style.background = 'transparent';
+      checkbox.innerHTML = '';
+      row.style.opacity = '1';
+      row.querySelector('div[style*="text-decoration"]')?.style?.setProperty('text-decoration', 'none');
+    } else {
+      checkbox.style.border = '1.5px solid var(--success)';
+      checkbox.style.background = 'var(--success-soft)';
+      checkbox.innerHTML = '<span style="color:var(--success);font-size:11px;font-weight:700;">✓</span>';
+      row.style.opacity = '0.45';
+      const label = row.querySelector('div[style*="font-weight:500"], div[style*="font-weight: 500"]');
+      if (label) label.style.textDecoration = 'line-through';
+    }
+  }
+
+  // ── Chat ────────────────────────────────────────────────
+  let chipUsed = false;
+
+  function sendChip(btn, text) {
+    if (chipUsed) return;
+    chipUsed = true;
+    btn.closest('.chat-chips').style.opacity = '0.4';
+    btn.closest('.chat-chips').style.pointerEvents = 'none';
+
+    const extra = document.getElementById('chat-extra');
+    document.getElementById('chat-extra-text').textContent = text;
+    extra.style.display = 'block';
+
+    const think = document.getElementById('chat-think-2');
+    const reply = document.getElementById('chat-reply-2');
+
+    setTimeout(() => {
+      think.style.display = 'flex';
+      scrollChatToBottom();
+    }, 300);
+
+    setTimeout(() => {
+      think.style.display = 'none';
+      reply.style.display = 'flex';
+      scrollChatToBottom();
+    }, 2200);
+  }
+
+  function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const val = input.value.trim();
+    if (!val) return;
+    input.value = '';
+
+    const messages = document.getElementById('chat-messages');
+    const bubble = document.createElement('div');
+    bubble.className = 'user-bubble';
+    bubble.innerHTML = `<div class="user-bubble-inner">${val}</div>`;
+    messages.appendChild(bubble);
+
+    const think = document.createElement('div');
+    think.className = 'think-chip';
+    think.innerHTML = `<div class="think-dots"><div class="think-dot"></div><div class="think-dot"></div><div class="think-dot"></div></div><span class="mono">thinking…</span>`;
+    messages.appendChild(think);
+    scrollChatToBottom();
+
+    setTimeout(() => {
+      think.remove();
+      const reply = document.createElement('div');
+      reply.className = 'bot-row';
+      reply.innerHTML = `
+        <div class="sembli-avatar"><svg width="14" height="14" viewBox="0 0 76 76"><rect x="10" y="62" width="56" height="8" rx="4" fill="var(--ink)"/><path d="M16 62 L16 38 A22 22 0 0 1 60 38 L60 62" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="bot-bubble">I've noted that — I'll factor it into your maintenance outlook. Is there anything else you'd like to track for this home?</div>`;
+      messages.appendChild(reply);
+      scrollChatToBottom();
+    }, 1600);
+  }
+
+  function scrollChatToBottom() {
+    const el = document.getElementById('chat-messages');
+    el.scrollTop = el.scrollHeight;
+  }
+</script>
+</body>
+</html>
