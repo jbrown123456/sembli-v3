@@ -26,26 +26,26 @@ export function WaitlistSection() {
     <section
       className="px-6 py-24 md:py-32 text-center"
       style={{
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(232,210,106,0.03)',
+        borderTop: '1px solid rgba(26,24,20,0.08)',
+        background: 'rgba(184,134,11,0.06)',
       }}
     >
       <div className="max-w-xl mx-auto">
-        <p className="font-mono text-[11px] uppercase tracking-[0.8px] mb-4" style={{ color: 'rgba(232,210,106,0.5)' }}>
+        <p className="font-mono text-[11px] uppercase tracking-[0.8px] mb-4" style={{ color: 'rgba(184,134,11,0.7)' }}>
           Private beta
         </p>
         <h2
           className="font-heading font-normal tracking-tight mb-4"
-          style={{ fontSize: 'clamp(32px, 5vw, 52px)', color: '#F0EBE0', lineHeight: 1.05 }}
+          style={{ fontSize: 'clamp(32px, 5vw, 52px)', color: '#1A1814', lineHeight: 1.05 }}
         >
           Be first through the door.
         </h2>
-        <p className="text-sm leading-relaxed mb-10" style={{ color: 'rgba(255,255,255,0.42)' }}>
+        <p className="text-sm leading-relaxed mb-10" style={{ color: 'rgba(26,24,20,0.5)' }}>
           Private beta opens summer 2026. Join the list and we&apos;ll reach out before anyone else.
         </p>
 
         {state === 'success' ? (
-          <p className="text-sm font-mono" style={{ color: '#E8D26A' }}>✓ {message}</p>
+          <p className="text-sm font-mono" style={{ color: '#B8860B' }}>✓ {message}</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
@@ -56,16 +56,16 @@ export function WaitlistSection() {
               onChange={e => setEmail(e.target.value)}
               className="flex-1 px-4 py-3 rounded-lg text-sm outline-none"
               style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: '#F0EBE0',
+                background: 'rgba(26,24,20,0.05)',
+                border: '1px solid rgba(26,24,20,0.15)',
+                color: '#1A1814',
               }}
             />
             <button
               type="submit"
               disabled={state === 'loading'}
               className="px-5 py-3 rounded-lg text-sm font-medium transition-opacity disabled:opacity-60 whitespace-nowrap"
-              style={{ background: '#E8D26A', color: '#1A1814' }}
+              style={{ background: '#1A1814', color: '#F5F0E8' }}
             >
               {state === 'loading' ? 'Joining…' : 'Join waitlist'}
             </button>
@@ -73,7 +73,7 @@ export function WaitlistSection() {
         )}
 
         {state === 'error' && (
-          <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{message}</p>
+          <p className="mt-3 text-xs" style={{ color: 'rgba(26,24,20,0.4)' }}>{message}</p>
         )}
       </div>
     </section>

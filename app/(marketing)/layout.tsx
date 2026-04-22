@@ -6,7 +6,7 @@ export default function MarketingLayout({
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: '#1A1814', color: '#F0EBE0' }}
+      style={{ background: '#F5F0E8', color: '#1A1814' }}
     >
       {children}
     </div>

@@ -6,7 +6,7 @@ const beats = [
     num: '01',
     heading: "Talk, don\u2019t type.",
     body: 'Open the app. Describe what you know about your home in plain language. Sembli extracts every asset, system, and vendor — no forms, no dropdowns, no guessing.',
-    screen: '02-onboarding', // for B5
+    screen: '02-onboarding',
   },
   {
     num: '02',
@@ -24,7 +24,7 @@ const beats = [
 
 export function HowItWorks() {
   return (
-    <section className="px-6 py-20 md:py-28" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <section className="px-6 py-20 md:py-28" style={{ borderTop: '1px solid rgba(26,24,20,0.08)' }}>
       <div className="max-w-6xl mx-auto">
         <SectionHeader
           eyebrow="How it works"
@@ -40,23 +40,21 @@ export function HowItWorks() {
                 i % 2 === 1 ? 'md:flex-row-reverse' : ''
               }`}
             >
-              {/* Text */}
               <div className="flex-1">
-                <p className="font-mono text-[10px] tracking-[0.6px] mb-4" style={{ color: '#E8D26A' }}>
+                <p className="font-mono text-[10px] tracking-[0.6px] mb-4" style={{ color: '#B8860B' }}>
                   {beat.num}
                 </p>
                 <h3
                   className="font-heading font-normal tracking-tight mb-4"
-                  style={{ fontSize: 'clamp(28px, 4vw, 40px)', color: '#F0EBE0', lineHeight: 1.1 }}
+                  style={{ fontSize: 'clamp(28px, 4vw, 40px)', color: '#1A1814', lineHeight: 1.1 }}
                 >
                   {beat.heading}
                 </h3>
-                <p className="text-base leading-relaxed max-w-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <p className="text-base leading-relaxed max-w-sm" style={{ color: 'rgba(26,24,20,0.5)' }}>
                   {beat.body}
                 </p>
               </div>
 
-              {/* iPhone */}
               <div className="flex justify-center md:justify-start flex-shrink-0">
                 <IPhoneFrame size="beat">
                   <div className="w-full h-full flex items-center justify-center" style={{ background: '#1A1814' }}>

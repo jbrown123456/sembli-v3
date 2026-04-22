@@ -20,11 +20,11 @@ const problems = [
 
 export function Thesis() {
   return (
-    <section className="px-6 py-20 md:py-28" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <section className="px-6 py-20 md:py-28" style={{ borderTop: '1px solid rgba(26,24,20,0.08)' }}>
       <div className="max-w-6xl mx-auto">
         <SectionHeader
           eyebrow="The problem"
-          heading={<>Most homeowners are flying <em style={{ fontStyle: 'italic', color: '#E8D26A' }}>blind.</em></>}
+          heading={<>Most homeowners are flying <em style={{ fontStyle: 'italic', color: '#B8860B' }}>blind.</em></>}
           className="mb-16"
         />
 
@@ -34,17 +34,17 @@ export function Thesis() {
               key={p.num}
               className="rounded-[14px] p-6"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
+                background: 'rgba(26,24,20,0.04)',
+                border: '1px solid rgba(26,24,20,0.08)',
               }}
             >
-              <p className="font-mono text-[10px] tracking-[0.6px] mb-3" style={{ color: '#E8D26A' }}>
+              <p className="font-mono text-[10px] tracking-[0.6px] mb-3" style={{ color: '#B8860B' }}>
                 {p.num}
               </p>
-              <h3 className="font-heading text-xl font-normal tracking-tight mb-3" style={{ color: '#F0EBE0' }}>
+              <h3 className="font-heading text-xl font-normal tracking-tight mb-3" style={{ color: '#1A1814' }}>
                 {p.heading}
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.42)' }}>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(26,24,20,0.5)' }}>
                 {p.body}
               </p>
             </div>

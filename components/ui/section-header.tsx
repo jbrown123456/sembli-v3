@@ -11,7 +11,7 @@ export function SectionHeader({ eyebrow, heading, className }: SectionHeaderProp
   return (
     <div className={cn("text-center mb-16", className)}>
       <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
-      <h2 className="font-heading text-3xl sm:text-4xl font-normal tracking-tight text-sembli-text">
+      <h2 className="font-heading text-3xl sm:text-4xl font-normal tracking-tight" style={{ color: '#1A1814' }}>
         {heading}
       </h2>
     </div>

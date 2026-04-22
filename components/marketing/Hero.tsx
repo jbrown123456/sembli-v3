@@ -34,18 +34,18 @@ export function Hero() {
 
           <h1
             className="font-heading font-normal leading-[1.03] tracking-[-2px] mb-5"
-            style={{ fontSize: 'clamp(42px, 7vw, 72px)', color: '#F0EBE0' }}
+            style={{ fontSize: 'clamp(42px, 7vw, 72px)', color: '#1A1814' }}
           >
             Your home,<br />
-            <em style={{ fontStyle: 'italic', color: '#E8D26A' }}>remembered.</em>
+            <em style={{ fontStyle: 'italic', color: '#B8860B' }}>remembered.</em>
           </h1>
 
-          <p className="text-base leading-relaxed mb-10 max-w-md" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <p className="text-base leading-relaxed mb-10 max-w-md" style={{ color: 'rgba(26,24,20,0.5)' }}>
             Long-distance caretaker opens the app, talks for two minutes, leaves with a cited 10-year outlook. No forms.
           </p>
 
           {state === 'success' ? (
-            <p className="text-sm font-mono" style={{ color: '#E8D26A' }}>
+            <p className="text-sm font-mono" style={{ color: '#B8860B' }}>
               ✓ {message}
             </p>
           ) : (
@@ -58,16 +58,16 @@ export function Hero() {
                 onChange={e => setEmail(e.target.value)}
                 className="flex-1 px-4 py-3 rounded-lg text-sm outline-none font-sans"
                 style={{
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: '#F0EBE0',
+                  background: 'rgba(26,24,20,0.05)',
+                  border: '1px solid rgba(26,24,20,0.15)',
+                  color: '#1A1814',
                 }}
               />
               <button
                 type="submit"
                 disabled={state === 'loading'}
                 className="px-5 py-3 rounded-lg text-sm font-medium transition-opacity disabled:opacity-60 whitespace-nowrap"
-                style={{ background: '#E8D26A', color: '#1A1814' }}
+                style={{ background: '#1A1814', color: '#F5F0E8' }}
               >
                 {state === 'loading' ? 'Joining…' : 'Join waitlist'}
               </button>
@@ -75,14 +75,13 @@ export function Hero() {
           )}
 
           {state === 'error' && (
-            <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{message}</p>
+            <p className="mt-3 text-xs" style={{ color: 'rgba(26,24,20,0.4)' }}>{message}</p>
           )}
         </div>
 
         {/* iPhone mockup */}
         <div className="hidden md:flex justify-center mt-12 md:mt-0 flex-shrink-0">
           <IPhoneFrame size="hero">
-            {/* Placeholder — real screenshot goes here in B5 */}
             <div className="w-full h-full flex items-center justify-center" style={{ background: '#1A1814' }}>
               <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 app screenshot
