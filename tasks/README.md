@@ -65,6 +65,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 Append-only. Newest entries at top. Agents add a one-liner when they complete a task or make a notable decision.
 
+- **2026-04-22** (Claude Code) — Task 10 B1 complete: Sembli dark tokens in `globals.css`, fonts (Fraunces/Inter/JetBrains Mono) in `layout.tsx`, primitives `Eyebrow`, `Chip`, `SectionHeader`, `Card` in `components/ui/`. Stopped for Joey review before B3.
 - **2026-04-22** (Cowork) — Cowork mounted directly at `sembli-v3/tasks/`. Tracker migrated from repo-root `TASKS.md` to `tasks/README.md` so both agents read/write the same file. If `TASKS.md` still exists at repo root, delete it — this is now canonical.
 - **2026-04-22** (Cowork) — Task 10 decisions locked: waitlist CTA, iPhone showcase, tagline `Your home, remembered.` Brief written to `10-landing-page.md`.
 - **2026-04-22** (Cowork) — Task 10 moved to In progress.
