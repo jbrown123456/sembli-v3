@@ -2,7 +2,7 @@
 
 **Current phase:** Phase 0 — Foundations
 **Launch target:** TBD
-**Last updated:** 2026-04-22 by Cowork
+**Last updated:** 2026-04-22 by Claude Code
 
 ---
 
@@ -24,7 +24,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 | ID | Task | Phase | Owner | Status | Blocked by | Brief |
 |----|------|-------|-------|--------|------------|-------|
-| 01 | Foundations — repo, Vercel, Supabase, CI | 0 | Joey + Claude Code | 🔵 In progress | — | [tasks/01-foundations.md](tasks/01-foundations.md) |
+| 01 | Foundations — repo, Vercel, Supabase, CI | 0 | Joey + Claude Code | 🟢 Done | — | [tasks/01-foundations.md](tasks/01-foundations.md) |
 | 02 | Frontend skeleton from Claude Design | 1 | Claude Code | ⚪ Pending | 01 | _brief TBD_ |
 | 03 | Auth + accounts via Supabase Auth | 2 | Claude Code | ⚪ Pending | 01, 02 | _brief TBD_ |
 | 04 | Data model + RLS policies | 3 | Claude Code | ⚪ Pending | 01 | _brief TBD_ |
@@ -51,7 +51,11 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 ## Currently active
 
-**Task 01 — Phase 0 Foundations.** Joey is working through Part A (human setup steps: GitHub repo, domain, Vercel project, Supabase x2, env vars, DNS). Claude Code picks up Part B once Part A is done and the repo is cloned locally.
+**Task 02 — Frontend skeleton.** Brief TBD. Waiting on Cowork to write `tasks/02-frontend-skeleton.md`, or Joey to request a draft. Unblocked now that Task 01 is done.
+
+**Also unblocked:** Task 04 (data model + RLS) — brief TBD.
+
+**Still blocked:** Tasks 03, 05–08 (need 02 or decisions #13/#14 first).
 
 ## Open decisions blocking future work
 
@@ -64,6 +68,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 Append-only. Newest entries at top. Agents should add a one-liner when they complete a task or make a notable decision.
 
+- **2026-04-22** (Claude Code) — Task 01 Part B complete. Next.js 16 scaffold, Supabase client factories (browser/server/admin), shadcn/ui, CI workflow, verification page, README. Commit: `chore: Phase 0 foundations`. Old React Native prototype archived to `_archive/`. Supabase CLI and pnpm installed. Note: Vercel project + Supabase projects + env vars + DNS still needed from Joey (Part A) before `pnpm dev` can verify the Supabase connection.
 - **2026-04-22** (Cowork) — TASKS.md created as single source of truth. Cowork Task list now mirrors this file.
 - **2026-04-22** (Cowork) — Task 01 moved to In progress. Repo-scaffold files generated (`CLAUDE.md`, `README-dev.md`, `tasks/01-foundations.md`).
 - **2026-04-21** (Cowork) — Form factor decision: **mobile-first responsive web PWA** (reversing the 2026-04-19 native-mobile call). Stack proposed: Next.js 14 on Vercel, Supabase, Stripe, PostHog, Sentry, Anthropic Claude API.
