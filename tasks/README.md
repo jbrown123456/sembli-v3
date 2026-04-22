@@ -24,7 +24,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 | ID | Task | Phase | Owner | Status | Blocked by | Brief |
 |----|------|-------|-------|--------|------------|-------|
-| 01 | Foundations — repo, Vercel, Supabase, CI | 0 | Joey + Claude Code | 🔵 In progress | — | [01-foundations.md](01-foundations.md) |
+| 01 | Foundations — repo, Vercel, Supabase, CI | 0 | Joey + Claude Code | 🟢 Done | — | [01-foundations.md](01-foundations.md) |
 | 02 | Frontend skeleton from Claude Design | 1 | Claude Code | ⚪ Pending | 01 | _brief TBD_ |
 | 03 | Auth + accounts via Supabase Auth | 2 | Claude Code | ⚪ Pending | 01, 02 | _brief TBD_ |
 | 04 | Data model + RLS policies | 3 | Claude Code | ⚪ Pending | 01 | _brief TBD_ |
@@ -51,7 +51,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 ## Currently active
 
-- **Task 01 — Phase 0 Foundations.** Joey working through Part A (human setup steps: GitHub repo, domain, Vercel, Supabase x2, env vars, DNS). Claude Code picks up Part B once Part A is done.
+- **Task 10 — Landing Page.** B1 done (design tokens, fonts, primitives). Next: pick up from B3 per brief.
 - **Task 10 — Landing Page.** Decisions locked 2026-04-22: waitlist CTA, iPhone showcase (not desktop iframes), tagline `Your home, remembered.` Brief ready in `10-landing-page.md`. Claude Code can start B1 (extract design system) as soon as the shared Tailwind config exists from Task 01.
 
 ## Open decisions blocking future work
@@ -65,6 +65,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 Append-only. Newest entries at top. Agents add a one-liner when they complete a task or make a notable decision.
 
+- **2026-04-22** (Claude Code) — Task 01 Part B complete. Next.js scaffold, Supabase client factories, CI, verification page. Commit: `chore: Phase 0 foundations`. Root `TASKS.md` deleted — `tasks/README.md` is canonical.
 - **2026-04-22** (Claude Code) — Task 10 B1 complete: Sembli dark tokens in `globals.css`, fonts (Fraunces/Inter/JetBrains Mono) in `layout.tsx`, primitives `Eyebrow`, `Chip`, `SectionHeader`, `Card` in `components/ui/`. Stopped for Joey review before B3.
 - **2026-04-22** (Cowork) — Cowork mounted directly at `sembli-v3/tasks/`. Tracker migrated from repo-root `TASKS.md` to `tasks/README.md` so both agents read/write the same file. If `TASKS.md` still exists at repo root, delete it — this is now canonical.
 - **2026-04-22** (Cowork) — Task 10 decisions locked: waitlist CTA, iPhone showcase, tagline `Your home, remembered.` Brief written to `10-landing-page.md`.
