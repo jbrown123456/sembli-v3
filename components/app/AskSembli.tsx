@@ -14,7 +14,7 @@ export function AskSembli() {
   return (
     <div className="fixed bottom-[76px] left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-[430px] flex justify-center px-6">
       <Link
-        href="/chat"
+        href="/chat?new=1"
         className="pointer-events-auto flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg transition-opacity hover:opacity-90 active:scale-95"
         style={{
           background: 'var(--almanac-ink)',

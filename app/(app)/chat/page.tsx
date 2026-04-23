@@ -1,79 +1,121 @@
-// Chat — full-screen Sembli conversation. Stub for Task 07.
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { ChatWindow } from '@/components/app/chat/ChatWindow'
+import { UpgradePrompt } from '@/components/app/chat/UpgradePrompt'
+import type { Message } from '@/components/app/chat/MessageBubble'
 
-export const metadata = { title: 'Ask Sembli' };
+export const metadata = { title: 'Ask Sembli' }
 
-export default function ChatPage() {
+interface ChatPageProps {
+  searchParams: Promise<{ id?: string; new?: string }>
+}
+
+export default async function ChatPage({ searchParams }: ChatPageProps) {
+  const supabase = await createClient()
+  const params = await searchParams
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/sign-in')
+
+  // Load subscription to gate Free tier
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('plan, status')
+    .eq('owner_id', user.id)
+    .single()
+
+  const isPro =
+    subscription?.status === 'active' &&
+    (subscription.plan === 'pro_monthly' || subscription.plan === 'pro_yearly')
+
+  // Free tier: show upgrade prompt
+  if (!isPro) {
+    return (
+      <div style={{ height: 'calc(100dvh - 60px)', display: 'flex', flexDirection: 'column' }}>
+        <UpgradePrompt />
+      </div>
+    )
+  }
+
+  // Load user's primary home
+  const { data: home } = await supabase
+    .from('homes')
+    .select('id')
+    .eq('owner_id', user.id)
+    .order('created_at')
+    .limit(1)
+    .single()
+
+  if (!home) {
+    redirect('/onboarding')
+  }
+
+  // Load recent conversations
+  const { data: conversations } = await supabase
+    .from('conversations')
+    .select('id, title, updated_at')
+    .eq('home_id', home.id)
+    .order('updated_at', { ascending: false })
+    .limit(20)
+
+  // Load messages for active conversation (if ?id= param)
+  let activeConversationId: string | null = null
+  let initialMessages: Message[] = []
+
+  const requestedId = params.id
+  if (requestedId && requestedId !== 'new') {
+    // Verify this conversation belongs to the user
+    const { data: conv } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('id', requestedId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (conv) {
+      activeConversationId = conv.id
+
+      const { data: msgs } = await supabase
+        .from('messages')
+        .select('id, role, content, tool_name')
+        .eq('conversation_id', conv.id)
+        .in('role', ['user', 'assistant'])
+        .order('created_at', { ascending: true })
+        .limit(100)
+
+      initialMessages = (msgs ?? []).map(m => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }))
+    }
+  } else if (!requestedId && conversations && conversations.length > 0) {
+    // Default: load most recent conversation
+    const latest = conversations[0]
+    activeConversationId = latest.id
+
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('id, role, content')
+      .eq('conversation_id', latest.id)
+      .in('role', ['user', 'assistant'])
+      .order('created_at', { ascending: true })
+      .limit(100)
+
+    initialMessages = (msgs ?? []).map(m => ({
+      id: m.id,
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }))
+  }
+
   return (
-    <div
-      style={{
-        height: 'calc(100dvh - 120px)', // subtract header
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px 18px',
-        color: 'var(--almanac-ink)',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          background: 'var(--almanac-surface-alt)',
-          display: 'grid',
-          placeItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path
-            d="M4 4h14a1 1 0 011 1v9a1 1 0 01-1 1H7l-4 3V5a1 1 0 011-1z"
-            stroke="var(--almanac-ink)"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      <div
-        style={{
-          fontFamily: 'var(--font-jetbrains-mono)',
-          fontSize: 10,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: 'var(--almanac-muted)',
-          marginBottom: 8,
-        }}
-      >
-        Coming in Task 07
-      </div>
-      <h2
-        style={{
-          fontFamily: 'var(--font-fraunces)',
-          fontSize: 24,
-          fontWeight: 400,
-          letterSpacing: '-0.03em',
-          margin: 0,
-        }}
-      >
-        Ask Sembli anything
-        <br />
-        <span style={{ fontStyle: 'italic', color: 'var(--almanac-brand-deep)' }}>
-          about the house.
-        </span>
-      </h2>
-      <p
-        style={{
-          marginTop: 12,
-          fontSize: 14,
-          lineHeight: 1.55,
-          color: 'var(--almanac-ink-soft)',
-          maxWidth: 280,
-        }}
-      >
-        Full AI chat wires in once auth + data model + Claude API are connected.
-      </p>
-    </div>
-  );
+    <ChatWindow
+      homeId={home.id}
+      initialConversationId={activeConversationId}
+      initialMessages={initialMessages}
+      conversations={conversations ?? []}
+      isPro={isPro}
+    />
+  )
 }

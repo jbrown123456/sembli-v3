@@ -151,6 +151,29 @@ export type UpdateAsset = Partial<InsertAsset>;
 export type UpdateVendor = Partial<InsertVendor>;
 export type UpdateMaintenanceItem = Partial<InsertMaintenanceItem>;
 
+// ─── Conversations + Messages (migration 0005) ────────────────
+
+export interface Conversation {
+  id: string;
+  home_id: string;
+  user_id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MessageRole = 'user' | 'assistant' | 'tool_result';
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  role: MessageRole;
+  content: string;
+  tool_use_id: string | null;
+  tool_name: string | null;
+  created_at: string;
+}
+
 // ─── Waitlist (migration 0001) ────────────────────────────────
 
 export interface Waitlist {
@@ -219,6 +242,18 @@ export interface Database {
         Row: Waitlist;
         Insert: Omit<Waitlist, 'id' | 'created_at'>;
         Update: Partial<Omit<Waitlist, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
+      conversations: {
+        Row: Conversation;
+        Insert: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Conversation, 'id' | 'home_id' | 'user_id'>>;
+        Relationships: [];
+      };
+      messages: {
+        Row: Message;
+        Insert: Omit<Message, 'id' | 'created_at'>;
+        Update: Partial<Omit<Message, 'id' | 'conversation_id'>>;
         Relationships: [];
       };
     };
