@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useAnalytics } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -10,11 +11,13 @@ interface SignOutButtonProps {
 
 export function SignOutButton({ initials = '?' }: SignOutButtonProps) {
   const router = useRouter()
+  const { reset } = useAnalytics()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSignOut() {
     setLoading(true)
+    reset()
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/auth/signin')

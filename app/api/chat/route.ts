@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { getEntitlements } from '@/lib/entitlements'
 import { anthropic, MODELS } from '@/lib/anthropic'
 import { buildChatContext } from '@/lib/ai/chat-context'
 import { CHAT_TOOLS, executeTool } from '@/lib/ai/chat-tools'
@@ -49,6 +50,15 @@ export async function POST(request: NextRequest) {
 
   if (!checkRateLimit(user.id)) {
     return NextResponse.json({ error: 'Rate limit reached — try again in an hour.' }, { status: 429 })
+  }
+
+  // Paywall: AI chat requires Pro
+  const entitlements = await getEntitlements(user.id)
+  if (!entitlements.canUseAI) {
+    return NextResponse.json(
+      { error: 'AI chat requires a Pro subscription. Upgrade at /upgrade.' },
+      { status: 403 }
+    )
   }
 
   let body: { conversationId: string | null; homeId: string; message: string }

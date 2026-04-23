@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { MaintenanceItem, Asset } from '@/lib/supabase/types'
 import { completeEvent, skipEvent, deleteEvent } from '@/app/(app)/timeline/actions'
+import { useAnalytics } from '@/lib/analytics'
 
 type ItemWithAsset = MaintenanceItem & { assets: Pick<Asset, 'name' | 'category'> | null }
 
@@ -33,12 +34,17 @@ function CompleteForm({ itemId, onDone }: CompleteFormProps) {
   const [cost, setCost] = useState('')
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
+  const { track } = useAnalytics()
 
   async function handle() {
     setLoading(true)
     await completeEvent(itemId, {
       costCents: cost ? Math.round(parseFloat(cost) * 100) : undefined,
       notes: notes || undefined,
+    })
+    track('maintenance_event_completed', {
+      had_cost: !!cost,
+      had_vendor: false,
     })
     onDone()
   }

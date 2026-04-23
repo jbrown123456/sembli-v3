@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Asset } from '@/lib/supabase/types'
 import { addManualEvent } from '@/app/(app)/timeline/actions'
+import { useAnalytics } from '@/lib/analytics'
 
 interface AddEventModalProps {
   homeId: string
@@ -17,6 +18,7 @@ export function AddEventModal({ homeId, assets, onClose }: AddEventModalProps) {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { track } = useAnalytics()
 
   async function handle(e: React.FormEvent) {
     e.preventDefault()
@@ -30,6 +32,7 @@ export function AddEventModal({ homeId, assets, onClose }: AddEventModalProps) {
       dueDate,
       description: notes || undefined,
     })
+    track('maintenance_event_added')
     onClose()
   }
 

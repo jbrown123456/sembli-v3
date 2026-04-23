@@ -31,10 +31,10 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 | 05 | Magic moment — onboarding → first asset (HVAC) | 4a | Claude Code | 🟢 Done | — | [05-first-asset.md](05-first-asset.md) |
 | 06 | Maintenance calendar per property | 4b | Claude Code | 🟢 Done | — | [06-maintenance-calendar.md](06-maintenance-calendar.md) |
 | 07 | Chat with AI assistant | 4c | Claude Code | 🟢 Done | 02, 03, 04 | [07-ai-chat.md](07-ai-chat.md) |
-| 08 | Payments — Stripe Checkout + paywall | 5 | Claude Code | ⚪ Pending | 03, 13 | [08-payments.md](08-payments.md) |
-| 09 | Analytics + observability | 6 | Claude Code | ⚪ Pending | 02 | [09-analytics.md](09-analytics.md) |
+| 08 | Payments — Stripe Checkout + paywall | 5 | Claude Code | 🟢 Done | 03, 13 | [08-payments.md](08-payments.md) |
+| 09 | Analytics + observability | 6 | Claude Code | 🟢 Done | 02 | [09-analytics.md](09-analytics.md) |
 | 10 | Landing page — iPhone showcase + waitlist | 7 | Claude Code | 🟢 Done | — | [10-landing-page.md](10-landing-page.md) |
-| 11 | Legal + production hardening | 8 | Joey + Claude Code | ⚪ Pending | 03, 08 | [11-legal-hardening.md](11-legal-hardening.md) |
+| 11 | Legal + production hardening | 8 | Joey + Claude Code | 🟢 Done | 03, 08 | [11-legal-hardening.md](11-legal-hardening.md) |
 | 12 | Pre-launch QA + launch | 9 | Joey + Claude Code | ⚪ Pending | 05–11 | _brief TBD_ |
 | 13 | Decision: pricing + paywall gating | — | Joey | 🟢 Done | — | Free (1 home, 5 assets) / Pro $9mo or $79yr |
 | 14 | Decision: AI model (Claude vs. mixed) | — | Joey | 🟢 Done | — | Claude only — Opus for reasoning, Haiku for classification |
@@ -51,8 +51,9 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 ## Currently active
 
-- **Tasks 01–07, 10 all complete.** Core product is built — HVAC intake, timeline, AI chat all wired. Next: Task 09 (analytics) or Task 11 (legal/hardening) before beta launch.
-- **Joey action needed:** Wire Supabase env vars + magic link redirect URL, and set ANTHROPIC_API_KEY in Vercel before live testing.
+- **Tasks 01–07, 09, 10, 11 all complete (Claude Code parts).** All code shipped. Next: Task 12 (QA + launch).
+- **Joey action needed (blocking launch):** Fill legal copy in `/privacy`, `/terms`, `/cookies`. Complete the production environment checklist in `11-legal-hardening.md` (Vercel env vars, Supabase redirect URLs, Sentry DSN, PostHog prod key, ANTHROPIC_API_KEY).
+- **Task 08 (Stripe)** deprioritized until post-beta.
 
 ## Open decisions blocking future work
 
@@ -64,6 +65,12 @@ _None — #13 and #14 locked. Task 08 (Stripe) deprioritized until post-beta._
 
 Append-only. Newest entries at top. Agents add a one-liner when they complete a task or make a notable decision.
 
+- **2026-04-22** (Claude Code) — Task 08 complete. Stripe Checkout + Customer Portal (monthly/yearly), entitlements gate (canUseAI/assetLimit), webhook handler for subscription lifecycle events, /upgrade page + UpgradeForm, /settings page with billing management, /auth/signout route, paywall enforcement in /api/chat. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 11 complete. /privacy, /terms, /cookies pages (Section+Placeholder pattern, cross-linked). Security headers in next.config.ts (X-Frame-Options, CSP, nosniff, Referrer-Policy, Permissions-Policy). lib/rateLimit.ts centralized in-memory limiter (waitlist/auth/extraction/chat helpers). settings/page.tsx: Legal links section + Danger zone with DeleteAccountButton. BottomNav: Settings tab (gear icon, /settings). DeleteAccountButton + deleteAccount server action. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 08 complete. Stripe Checkout + Customer Portal (monthly/yearly), entitlements gate (canUseAI/assetLimit), webhook handler for subscription lifecycle events, /upgrade page + UpgradeForm, /settings page with billing management, /auth/signout route, paywall enforcement in /api/chat. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 11 complete. /privacy + /terms + /cookies page shells under (marketing) layout with [PLACEHOLDER] callouts. MarketingFooter updated to real Link hrefs (+ Cookies added). Security headers in next.config.ts: X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP covering Stripe/PostHog/Supabase/Sentry. deleteAccount server action (admin client, cascade-safe). DeleteAccountButton client component (type-to-confirm modal). Settings page: Legal section + Danger Zone wired. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 09 final wiring: maintenance_event_completed (EventCard/CompleteForm), maintenance_event_added (AddEventModal), asset_created (FirstAssetForm). @vercel/analytics installed, <Analytics /> added to root layout. SignOutButton calls posthog.reset() on sign-out. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 09 complete. @sentry/nextjs installed; sentry.{client,server,edge}.config.ts + withSentryConfig in next.config.ts. useAnalytics() hook with typed event catalogue. PostHogIdentify client component (identify + groupHome + app_loaded fired per session). error.tsx boundaries for (app) and (marketing) with Sentry.captureException. Events wired: onboarding (started/step/completed), chat (message_sent, tool_used), upgrade_prompt_shown. .env.example updated with all Sentry + Stripe vars. Fixed Stripe API v22 breaking change: current_period_end moved from Subscription to SubscriptionItem. Fixed stripe apiVersion mismatch (basil→dahlia). pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — Task 07 complete. Migration 0005 (conversations + messages + RLS), streaming API route `/api/chat` with agentic tool loop (5 tools: search_assets, get_asset_details, get_maintenance_history, create_maintenance_event, complete_maintenance_event), ChatWindow + MessageBubble (react-markdown) + ToolCallChip + TypingIndicator + ConversationList + UpgradePrompt components. AskSembli FAB updated to pass `?new=1`. Free tier gated behind UpgradePrompt. `pnpm typecheck` clean.
 - **2026-04-22** (Claude Code) — Tasks 05, 06, 07 complete. First-asset HVAC intake with Claude Vision, real maintenance timeline, streaming AI chat with 5 tools (search, details, history, create, complete). pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — All briefs drafted: 03-auth, 05-first-asset (HVAC), 06-maintenance-calendar, 07-ai-chat, 08-payments, 09-analytics, 11-legal-hardening. Decisions #13 (pricing) and #14 (AI model) locked. Task 03 claimed.

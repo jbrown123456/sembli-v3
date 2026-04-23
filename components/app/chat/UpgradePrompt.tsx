@@ -1,8 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect } from 'react'
+import { useAnalytics } from '@/lib/analytics'
 
 export function UpgradePrompt() {
+  const { track } = useAnalytics()
+  useEffect(() => {
+    track('upgrade_prompt_shown', { trigger: 'chat' })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div
       style={{

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { createFirstAsset, skipFirstAsset } from './actions'
 import type { ExtractedAsset } from '@/app/api/ai/extract-asset/route'
+import { useAnalytics } from '@/lib/analytics'
 
 type Mode = 'choose' | 'text' | 'photo' | 'confirm' | 'loading'
 
@@ -54,6 +55,7 @@ export function FirstAssetForm() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const { track } = useAnalytics()
 
   async function extractFromText() {
     if (!textInput.trim()) return
@@ -104,6 +106,9 @@ export function FirstAssetForm() {
   async function handleConfirm() {
     if (!extracted) return
     setSubmitting(true)
+    // Track before server action (which redirects)
+    const source = textInput ? 'ai_extracted' : 'photo'
+    track('asset_created', { category: 'HVAC', source })
     await createFirstAsset({
       name: extracted.name,
       brand: extracted.brand,

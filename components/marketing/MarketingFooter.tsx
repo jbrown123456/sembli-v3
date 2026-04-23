@@ -1,4 +1,10 @@
-'use client'
+import Link from 'next/link'
+
+const LINKS = [
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
+  { label: 'Cookies', href: '/cookies' },
+] as const
 
 export function MarketingFooter() {
   return (
@@ -11,17 +17,15 @@ export function MarketingFooter() {
           © 2026 Sembli
         </p>
         <nav className="flex gap-6">
-          {['Privacy', 'Terms', 'Contact'].map(item => (
-            <a
-              key={item}
-              href="#"
+          {LINKS.map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
               className="font-mono text-[11px] transition-colors"
-              style={{ color: 'rgba(26,24,20,0.3)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(26,24,20,0.7)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(26,24,20,0.3)')}
+              style={{ color: 'rgba(26,24,20,0.3)', textDecoration: 'none' }}
             >
-              {item}
-            </a>
+              {label}
+            </Link>
           ))}
         </nav>
       </div>

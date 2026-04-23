@@ -67,6 +67,21 @@ const TABS = [
       </svg>
     ),
   },
+  {
+    href: '/settings',
+    label: 'Settings',
+    icon: (active: boolean) => (
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="11" r="3" stroke="currentColor" strokeWidth={active ? 2 : 1.5} />
+        <path
+          d="M11 2v2M11 18v2M2 11h2M18 11h2M4.22 4.22l1.42 1.42M16.36 16.36l1.42 1.42M4.22 17.78l1.42-1.42M16.36 5.64l1.42-1.42"
+          stroke="currentColor"
+          strokeWidth={active ? 2 : 1.5}
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
 ] as const;
 
 export function BottomNav() {

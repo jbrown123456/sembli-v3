@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageBubble, type Message, type ToolCall } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 import { ConversationList, type ConversationSummary } from './ConversationList'
+import { useAnalytics } from '@/lib/analytics'
 
 interface ChatWindowProps {
   homeId: string
@@ -23,6 +24,7 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { track } = useAnalytics()
 
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId)
@@ -60,6 +62,7 @@ export function ChatWindow({
     const text = input.trim()
     if (!text || isStreaming) return
 
+    const isNewConversation = !conversationId
     setInput('')
     setIsStreaming(true)
 
@@ -87,6 +90,12 @@ export function ChatWindow({
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`)
       }
+
+      // Fire send event once we know the request succeeded
+      track('chat_message_sent', {
+        conversation_id: conversationId ?? 'new',
+        is_new_conversation: isNewConversation,
+      })
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -117,6 +126,7 @@ export function ChatWindow({
                 )
               )
             } else if (event.type === 'tool_start') {
+              track('chat_tool_used', { tool_name: event.toolName })
               pendingTools.push({ toolName: event.toolName, done: false })
               setMessages(prev =>
                 prev.map(m =>

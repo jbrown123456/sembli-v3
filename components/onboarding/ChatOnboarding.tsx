@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { completeOnboarding } from '@/app/(onboarding)/onboarding/actions';
+import { useAnalytics } from '@/lib/analytics';
 import {
   MonoLabel, Cite, SourceCard,
   UserBubble, BotBubble, Highlight, ThinkChip,
@@ -968,19 +969,30 @@ export function ChatOnboarding() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState('');
+  const { track } = useAnalytics();
+
+  // Fire onboarding_started once on mount
+  useEffect(() => {
+    track('onboarding_started');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function advanceTo(nextStep: number) {
+    track('onboarding_step_completed', { step: nextStep });
+    setStep(nextStep);
+  }
 
   async function handleDone() {
-    // Mark onboarding complete in DB (best-effort — don't block navigation on error)
+    track('onboarding_completed', { home_name_set: !!address, has_hvac: false });
     await completeOnboarding().catch(() => {});
-    // Go to add-home → first-asset → dashboard flow
     router.push('/onboarding/add-home');
   }
 
   const screens = [
-    <ScreenWelcome key="welcome" onNext={() => setStep(1)} />,
-    <ScreenIntake key="intake" onNext={(addr) => { setAddress(addr); setStep(2); }} />,
-    <ScreenMagic key="magic" address={address || '412 Oak St, Des Moines IA'} onNext={() => setStep(3)} />,
-    <ScreenVoice key="voice" onNext={() => setStep(4)} />,
+    <ScreenWelcome key="welcome" onNext={() => advanceTo(1)} />,
+    <ScreenIntake key="intake" onNext={(addr) => { setAddress(addr); advanceTo(2); }} />,
+    <ScreenMagic key="magic" address={address || '412 Oak St, Des Moines IA'} onNext={() => advanceTo(3)} />,
+    <ScreenVoice key="voice" onNext={() => advanceTo(4)} />,
     <ScreenOutlook key="outlook" onDone={handleDone} />,
   ];
 
