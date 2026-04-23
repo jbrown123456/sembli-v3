@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next'
-import { withSentryConfig } from '@sentry/nextjs'
 
 const CSP = [
   "default-src 'self'",
@@ -33,19 +32,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withSentryConfig(nextConfig, {
-  // Sentry org + project (set in CI env vars)
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-
-  // Upload source maps to Sentry in CI only (SENTRY_AUTH_TOKEN must be set)
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-
-  // Suppress source map upload logs outside CI
-  silent: !process.env.CI,
-
-  // Disable source map upload if no DSN is configured (local dev)
-  sourcemaps: {
-    disable: !process.env.NEXT_PUBLIC_SENTRY_DSN,
-  },
-})
+export default nextConfig
