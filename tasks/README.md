@@ -26,9 +26,9 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 |----|------|-------|-------|--------|------------|-------|
 | 01 | Foundations — repo, Vercel, Supabase, CI | 0 | Joey + Claude Code | 🟢 Done | — | [01-foundations.md](01-foundations.md) |
 | 02 | Frontend skeleton from Claude Design | 1 | Claude Code | 🟢 Done | 01 | [02-frontend-skeleton.md](02-frontend-skeleton.md) |
-| 03 | Auth + accounts via Supabase Auth | 2 | Claude Code | 🔵 In progress | 01, 02 | [03-auth.md](03-auth.md) |
-| 04 | Data model + RLS policies | 3 | Claude Code | ⚪ Pending | 01, 03 | [04-data-model.md](04-data-model.md) |
-| 05 | Magic moment — onboarding → first asset (HVAC) | 4a | Claude Code | ⚪ Pending | 02, 03, 04 | [05-first-asset.md](05-first-asset.md) |
+| 03 | Auth + accounts via Supabase Auth | 2 | Claude Code | 🟢 Done | — | [03-auth.md](03-auth.md) |
+| 04 | Data model + RLS policies | 3 | Claude Code | 🟢 Done | — | [04-data-model.md](04-data-model.md) |
+| 05 | Magic moment — onboarding → first asset (HVAC) | 4a | Claude Code | 🟢 Done | — | [05-first-asset.md](05-first-asset.md) |
 | 06 | Maintenance calendar per property | 4b | Claude Code | ⚪ Pending | 02, 03, 04 | [06-maintenance-calendar.md](06-maintenance-calendar.md) |
 | 07 | Chat with AI assistant | 4c | Claude Code | ⚪ Pending | 02, 03, 04 | [07-ai-chat.md](07-ai-chat.md) |
 | 08 | Payments — Stripe Checkout + paywall | 5 | Claude Code | ⚪ Pending | 03, 13 | [08-payments.md](08-payments.md) |
@@ -51,9 +51,8 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 ## Currently active
 
-- **Task 03 — Auth.** 🔵 In progress. Building: `/auth/signin`, `/auth/callback`, middleware, `profiles` table + trigger, `SignOutButton`.
-- **All briefs written.** 03–09, 11 all have brief files. Decisions #13 and #14 locked.
-- **Note for Joey:** Supabase env vars and magic link redirect URLs must be configured before auth can be tested end-to-end. See Task 03 brief.
+- **Task 06 — Maintenance calendar.** 🔵 In progress. Next up after 05.
+- **Tasks 01–05, 10 all complete.** Typecheck clean. E2E auth testing requires Joey to wire Supabase env vars and magic link redirect URL in the Supabase dashboard.
 
 ## Open decisions blocking future work
 

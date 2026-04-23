@@ -972,7 +972,7 @@ export function ChatOnboarding() {
   async function handleDone() {
     // Mark onboarding complete in DB (best-effort — don't block navigation on error)
     await completeOnboarding().catch(() => {});
-    router.push('/dashboard');
+    router.push('/onboarding/first-asset');
   }
 
   const screens = [
