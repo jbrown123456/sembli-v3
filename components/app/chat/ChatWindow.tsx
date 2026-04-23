@@ -5,14 +5,17 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageBubble, type Message, type ToolCall } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 import { ConversationList, type ConversationSummary } from './ConversationList'
+import { GuestLimitPrompt } from './GuestLimitPrompt'
 import { useAnalytics } from '@/lib/analytics'
+import Link from 'next/link'
 
 interface ChatWindowProps {
-  homeId: string
+  homeId: string | null
   initialConversationId: string | null
   initialMessages: Message[]
   conversations: ConversationSummary[]
   isPro: boolean
+  isGuest?: boolean
 }
 
 export function ChatWindow({
@@ -20,29 +23,31 @@ export function ChatWindow({
   initialConversationId,
   initialMessages,
   conversations,
+  isGuest = false,
 }: ChatWindowProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { track } = useAnalytics()
 
-  // If ?new=1, start with a blank conversation (initialise lazily to avoid setState-in-effect)
   const isNew = searchParams.get('new') === '1'
   const [messages, setMessages] = useState<Message[]>(() => isNew ? [] : initialMessages)
   const [conversationId, setConversationId] = useState<string | null>(() => isNew ? null : initialConversationId)
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
+  const [guestLimitReached, setGuestLimitReached] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const abortRef = useRef<AbortController | null>(null)
+  // Stable ref so send() always reads the latest messages without stale closure issues
+  const messagesRef = useRef(messages)
+  messagesRef.current = messages
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Auto-resize textarea
   useEffect(() => {
     const ta = textareaRef.current
     if (!ta) return
@@ -50,24 +55,21 @@ export function ChatWindow({
     ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`
   }, [input])
 
-  // Strip ?new=1 from URL now that we've handled it in state
   useEffect(() => {
     if (isNew) router.replace('/chat')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = useCallback(async () => {
     const text = input.trim()
-    if (!text || isStreaming) return
+    if (!text || isStreaming || guestLimitReached) return
 
     const isNewConversation = !conversationId
     setInput('')
     setIsStreaming(true)
 
-    // Optimistic user message
     const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text }
     setMessages(prev => [...prev, userMsg])
 
-    // Placeholder assistant message (streaming)
     const assistantId = crypto.randomUUID()
     setMessages(prev => [
       ...prev,
@@ -77,22 +79,43 @@ export function ChatWindow({
     abortRef.current = new AbortController()
 
     try {
+      // Guests send conversation history in the body (stateless server); auth users use conversationId
+      const body = isGuest
+        ? JSON.stringify({
+            message: text,
+            history: messagesRef.current
+              .filter(m => !m.isStreaming && m.content && (m.role === 'user' || m.role === 'assistant'))
+              .map(m => ({ role: m.role, content: m.content })),
+          })
+        : JSON.stringify({ conversationId, homeId, message: text })
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, homeId, message: text }),
+        body,
         signal: abortRef.current.signal,
       })
+
+      // Guest message cap reached
+      if (res.status === 429 && isGuest) {
+        const json = await res.json().catch(() => ({}))
+        if (json.error === 'guest_limit_reached') {
+          setMessages(prev => prev.filter(m => m.id !== userMsg.id && m.id !== assistantId))
+          setGuestLimitReached(true)
+          return
+        }
+      }
 
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`)
       }
 
-      // Fire send event once we know the request succeeded
-      track('chat_message_sent', {
-        conversation_id: conversationId ?? 'new',
-        is_new_conversation: isNewConversation,
-      })
+      if (!isGuest) {
+        track('chat_message_sent', {
+          conversation_id: conversationId ?? 'new',
+          is_new_conversation: isNewConversation,
+        })
+      }
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -171,7 +194,7 @@ export function ChatWindow({
       setIsStreaming(false)
       abortRef.current = null
     }
-  }, [input, isStreaming, conversationId, homeId, track])
+  }, [input, isStreaming, guestLimitReached, conversationId, homeId, isGuest, track])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -192,71 +215,115 @@ export function ChatWindow({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'calc(100dvh - 60px)', // subtract AppHeader
+        height: 'calc(100dvh - 60px)',
         position: 'relative',
         background: 'var(--almanac-bg)',
       }}
     >
-      {/* Top bar with history toggle */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 16px',
-          borderBottom: '1px solid var(--almanac-border-soft)',
-          flexShrink: 0,
-        }}
-      >
-        <button
-          onClick={() => setShowSidebar(s => !s)}
+      {/* Guest banner */}
+      {isGuest && !guestLimitReached && (
+        <div
+          style={{
+            background: 'var(--almanac-brand-soft)',
+            borderBottom: '1px solid var(--almanac-border)',
+            padding: '8px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+            gap: 12,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 12,
+              fontFamily: 'var(--font-inter)',
+              color: 'var(--almanac-ink-soft)',
+              margin: 0,
+              lineHeight: 1.4,
+            }}
+          >
+            Trying Sembli as a guest — 5 free messages.
+          </p>
+          <Link
+            href="/auth/signin"
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: 'var(--font-inter)',
+              color: 'var(--almanac-brand-deep)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            Sign up free →
+          </Link>
+        </div>
+      )}
+
+      {/* Top bar */}
+      {!isGuest && (
+        <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--almanac-ink-soft)',
-            fontFamily: 'var(--font-inter)',
-            fontSize: 13,
-            padding: '4px 8px',
-            borderRadius: 6,
+            justifyContent: 'space-between',
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--almanac-border-soft)',
+            flexShrink: 0,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 3h10M2 7h7M2 11h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-          </svg>
-          History
-        </button>
-
-        {conversationId && (
           <button
-            onClick={handleNew}
+            onClick={() => setShowSidebar(s => !s)}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
               background: 'transparent',
-              border: '1px solid var(--almanac-border)',
-              borderRadius: 14,
-              padding: '4px 10px',
+              border: 'none',
               cursor: 'pointer',
               color: 'var(--almanac-ink-soft)',
               fontFamily: 'var(--font-inter)',
-              fontSize: 12,
+              fontSize: 13,
+              padding: '4px 8px',
+              borderRadius: 6,
             }}
           >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 3h10M2 7h7M2 11h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
             </svg>
-            New
+            History
           </button>
-        )}
-      </div>
 
-      {/* Conversation history sidebar (slide over) */}
-      {showSidebar && (
+          {conversationId && (
+            <button
+              onClick={handleNew}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                background: 'transparent',
+                border: '1px solid var(--almanac-border)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                cursor: 'pointer',
+                color: 'var(--almanac-ink-soft)',
+                fontFamily: 'var(--font-inter)',
+                fontSize: 12,
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+              New
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Conversation history sidebar */}
+      {showSidebar && !isGuest && (
         <>
           <div
             style={{
@@ -346,15 +413,24 @@ export function ChatWindow({
                 </span>
               </h2>
               <p style={{ fontSize: 14, color: 'var(--almanac-ink-soft)', maxWidth: 260, margin: '0 auto', lineHeight: 1.55 }}>
-                I know your home&apos;s assets and maintenance history. Try asking about an upcoming service, an appliance, or what needs attention.
+                {isGuest
+                  ? "Try asking about home maintenance, appliances, or upkeep. No account needed for your first 5 messages."
+                  : "I know your home's assets and maintenance history. Try asking about an upcoming service, an appliance, or what needs attention."}
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 320, marginTop: 8 }}>
-              {[
-                'What maintenance is coming up this month?',
-                'When was the HVAC last serviced?',
-                'Schedule a filter change for next month',
-              ].map(prompt => (
+              {(isGuest
+                ? [
+                    'How often should I service my HVAC?',
+                    'What maintenance should I do before winter?',
+                    'How do I know when my water heater needs replacing?',
+                  ]
+                : [
+                    'What maintenance is coming up this month?',
+                    'When was the HVAC last serviced?',
+                    'Schedule a filter change for next month',
+                  ]
+              ).map(prompt => (
                 <button
                   key={prompt}
                   onClick={() => { setInput(prompt); textareaRef.current?.focus() }}
@@ -389,95 +465,98 @@ export function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Composer */}
-      <div
-        style={{
-          borderTop: '1px solid var(--almanac-border-soft)',
-          padding: '12px 16px',
-          paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-          background: 'var(--almanac-bg)',
-          flexShrink: 0,
-        }}
-      >
+      {/* Composer or guest limit prompt */}
+      {guestLimitReached ? (
+        <GuestLimitPrompt />
+      ) : (
         <div
           style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 10,
-            background: 'var(--almanac-surface-alt)',
-            border: '1.5px solid var(--almanac-border)',
-            borderRadius: 20,
-            padding: '8px 8px 8px 16px',
-            transition: 'border-color 0.15s',
+            borderTop: '1px solid var(--almanac-border-soft)',
+            padding: '12px 16px',
+            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+            background: 'var(--almanac-bg)',
+            flexShrink: 0,
           }}
-          onFocus={() => {}}
         >
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask about your home…"
-            rows={1}
-            disabled={isStreaming}
+          <div
             style={{
-              flex: 1,
-              resize: 'none',
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontFamily: 'var(--font-inter)',
-              fontSize: 15,
-              lineHeight: 1.5,
-              color: 'var(--almanac-ink)',
-              minHeight: 24,
-              maxHeight: 120,
-              overflowY: 'auto',
-            }}
-          />
-          <button
-            onClick={isStreaming ? () => abortRef.current?.abort() : send}
-            disabled={!isStreaming && !input.trim()}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: isStreaming
-                ? 'var(--almanac-danger)'
-                : input.trim()
-                  ? 'var(--almanac-ink)'
-                  : 'var(--almanac-border)',
-              border: 'none',
-              cursor: input.trim() || isStreaming ? 'pointer' : 'default',
-              display: 'grid',
-              placeItems: 'center',
-              flexShrink: 0,
-              transition: 'background 0.15s',
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: 10,
+              background: 'var(--almanac-surface-alt)',
+              border: '1.5px solid var(--almanac-border)',
+              borderRadius: 20,
+              padding: '8px 8px 8px 16px',
+              transition: 'border-color 0.15s',
             }}
           >
-            {isStreaming ? (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <rect x="2" y="2" width="8" height="8" rx="1.5" fill="white" />
-              </svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 11V3M3.5 6.5L7 3l3.5 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </button>
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about your home…"
+              rows={1}
+              disabled={isStreaming}
+              style={{
+                flex: 1,
+                resize: 'none',
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontFamily: 'var(--font-inter)',
+                fontSize: 15,
+                lineHeight: 1.5,
+                color: 'var(--almanac-ink)',
+                minHeight: 24,
+                maxHeight: 120,
+                overflowY: 'auto',
+              }}
+            />
+            <button
+              onClick={isStreaming ? () => abortRef.current?.abort() : send}
+              disabled={!isStreaming && !input.trim()}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: isStreaming
+                  ? 'var(--almanac-danger)'
+                  : input.trim()
+                    ? 'var(--almanac-ink)'
+                    : 'var(--almanac-border)',
+                border: 'none',
+                cursor: input.trim() || isStreaming ? 'pointer' : 'default',
+                display: 'grid',
+                placeItems: 'center',
+                flexShrink: 0,
+                transition: 'background 0.15s',
+              }}
+            >
+              {isStreaming ? (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <rect x="2" y="2" width="8" height="8" rx="1.5" fill="white" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 11V3M3.5 6.5L7 3l3.5 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+          </div>
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: 11,
+              color: 'var(--almanac-muted)',
+              marginTop: 6,
+              fontFamily: 'var(--font-inter)',
+            }}
+          >
+            {isGuest ? 'No account needed · 5 free messages' : 'Shift+Enter for new line · Enter to send'}
+          </p>
         </div>
-        <p
-          style={{
-            textAlign: 'center',
-            fontSize: 11,
-            color: 'var(--almanac-muted)',
-            marginTop: 6,
-            fontFamily: 'var(--font-inter)',
-          }}
-        >
-          Shift+Enter for new line · Enter to send
-        </p>
-      </div>
+      )}
     </div>
   )
 }

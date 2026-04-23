@@ -12,12 +12,26 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getEntitlements } from '@/lib/entitlements'
 import { anthropic, MODELS } from '@/lib/anthropic'
 import { buildChatContext } from '@/lib/ai/chat-context'
 import { CHAT_TOOLS, executeTool } from '@/lib/ai/chat-tools'
 import { NextResponse, type NextRequest } from 'next/server'
 import type Anthropic from '@anthropic-ai/sdk'
+
+const GUEST_MESSAGE_CAP = 5
+
+function guestSystemPrompt(): string {
+  const today = new Date().toISOString().split('T')[0]
+  return `You are Sembli, a knowledgeable and warm AI home assistant. You're helping a new visitor try Sembli before they create an account.
+
+Answer questions about home maintenance, appliances, systems, and upkeep honestly and specifically. Show what you can do — be practical and useful, not vague.
+
+This is a demo session: you don't have the visitor's actual home data yet. After helping with their question, briefly mention that with a free Sembli account they can track their specific home assets (HVAC, roof, appliances, vehicles, more), maintenance history, and upcoming service reminders — all in one place. Keep it natural and brief, not pushy.
+
+Today's date: ${today}`
+}
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -44,9 +58,93 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // ── Guest path ──────────────────────────────────────────────────────────────
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const existingGuestId = request.cookies.get('sembli-guest-id')?.value
+    const guestId = existingGuestId ?? crypto.randomUUID()
+    const admin = createAdminClient()
+
+    // Read or create guest session
+    const { data: existing } = await admin
+      .from('guest_sessions')
+      .select('message_count')
+      .eq('id', guestId)
+      .maybeSingle()
+
+    if (existing && existing.message_count >= GUEST_MESSAGE_CAP) {
+      return NextResponse.json({ error: 'guest_limit_reached' }, { status: 429 })
+    }
+
+    // Increment count (insert for new guests, update for returning)
+    if (existing) {
+      await admin
+        .from('guest_sessions')
+        .update({ message_count: existing.message_count + 1, last_seen_at: new Date().toISOString() })
+        .eq('id', guestId)
+    } else {
+      await admin.from('guest_sessions').insert({ id: guestId, message_count: 1 })
+    }
+
+    let guestBody: { message: string; history?: Array<{ role: string; content: string }> }
+    try {
+      guestBody = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    if (!guestBody.message?.trim()) {
+      return NextResponse.json({ error: 'message is required' }, { status: 400 })
+    }
+
+    // Build message history from client (guests have no DB-backed conversation)
+    const guestMessages: Anthropic.MessageParam[] = [
+      ...(guestBody.history ?? [])
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      { role: 'user', content: guestBody.message },
+    ]
+
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        const send = (data: object) => controller.enqueue(encoder.encode(sseEvent(data)))
+        try {
+          const response = anthropic.messages.stream({
+            model: MODELS.SONNET,
+            max_tokens: 600,
+            system: guestSystemPrompt(),
+            messages: guestMessages,
+          })
+
+          for await (const event of response) {
+            if (
+              event.type === 'content_block_delta' &&
+              event.delta.type === 'text_delta'
+            ) {
+              send({ type: 'text', delta: event.delta.text })
+            }
+          }
+
+          send({ type: 'done' })
+        } catch (err) {
+          send({ type: 'error', message: err instanceof Error ? err.message : 'Unexpected error' })
+        } finally {
+          controller.close()
+        }
+      },
+    })
+
+    const cookieMaxAge = 30 * 24 * 60 * 60 // 30 days
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Set-Cookie': `sembli-guest-id=${guestId}; Path=/; Max-Age=${cookieMaxAge}; SameSite=Lax; HttpOnly`,
+      },
+    })
   }
+  // ── End guest path ──────────────────────────────────────────────────────────
 
   if (!checkRateLimit(user.id)) {
     return NextResponse.json({ error: 'Rate limit reached — try again in an hour.' }, { status: 429 })

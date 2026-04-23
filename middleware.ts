@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes that require authentication
-const PROTECTED_PREFIXES = ['/dashboard', '/chat', '/assets', '/timeline', '/settings', '/upgrade', '/onboarding']
+// Routes that require authentication (/chat is intentionally excluded — guests can try it)
+const PROTECTED_PREFIXES = ['/dashboard', '/assets', '/timeline', '/settings', '/upgrade', '/onboarding']
 
 // Routes that authenticated users shouldn't see
 const AUTH_ONLY_PREFIXES = ['/auth/signin']

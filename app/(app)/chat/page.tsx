@@ -15,7 +15,20 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
   const params = await searchParams
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/sign-in')
+
+  // Guest mode: let unauthenticated visitors try the chat (API enforces 5-message cap)
+  if (!user) {
+    return (
+      <ChatWindow
+        homeId={null}
+        initialConversationId={null}
+        initialMessages={[]}
+        conversations={[]}
+        isPro={false}
+        isGuest={true}
+      />
+    )
+  }
 
   // Load subscription to gate Free tier
   const { data: subscription } = await supabase
