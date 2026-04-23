@@ -132,6 +132,25 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ─── Almanac light palette — used by the (app) route group ── */
+:root {
+  --almanac-bg: #FBF8F1;
+  --almanac-surface: #FFFFFF;
+  --almanac-surface-alt: #F4EFE2;
+  --almanac-ink: #1C1A16;
+  --almanac-ink-soft: #4A453B;
+  --almanac-muted: #8B8476;
+  --almanac-border: #E6DFCE;
+  --almanac-border-soft: #EFE8D6;
+  --almanac-brand: #E8D26A;
+  --almanac-brand-deep: #B89A2E;
+  --almanac-brand-soft: #F6EDB8;
+  --almanac-accent: #2D4A3A;
+  --almanac-accent-soft: #DCE5DC;
+  --almanac-danger: #B4432B;
+  --almanac-success: #3F6E4A;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
