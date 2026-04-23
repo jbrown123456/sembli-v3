@@ -29,28 +29,37 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Do not add any logic between createServerClient and getUser()
-  // that may cause the auth session to be lost.
-  const { data: { user } } = await supabase.auth.getUser()
-
   const { pathname } = request.nextUrl
-
   const isProtected = PROTECTED_PREFIXES.some(p => pathname.startsWith(p))
   const isAuthOnly = AUTH_ONLY_PREFIXES.some(p => pathname.startsWith(p))
 
-  // Unauthenticated user trying to access protected route → sign-in
-  if (!user && isProtected) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/signin'
-    url.searchParams.set('next', pathname)
-    return NextResponse.redirect(url)
-  }
+  // Only run auth check when needed
+  if (isProtected || isAuthOnly) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: { user } } = await (supabase.auth as any).getUser()
 
-  // Authenticated user hitting sign-in page → dashboard
-  if (user && isAuthOnly) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+      if (!user && isProtected) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/signin'
+        url.searchParams.set('next', pathname)
+        return NextResponse.redirect(url)
+      }
+
+      if (user && isAuthOnly) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
+    } catch (err) {
+      console.error('[middleware] auth check failed:', err)
+      // On auth failure, redirect protected routes to sign-in rather than crashing
+      if (isProtected) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/signin'
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
   return supabaseResponse
