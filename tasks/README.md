@@ -30,7 +30,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 | 04 | Data model + RLS policies | 3 | Claude Code | 🟢 Done | — | [04-data-model.md](04-data-model.md) |
 | 05 | Magic moment — onboarding → first asset (HVAC) | 4a | Claude Code | 🟢 Done | — | [05-first-asset.md](05-first-asset.md) |
 | 06 | Maintenance calendar per property | 4b | Claude Code | ⚪ Pending | 02, 03, 04 | [06-maintenance-calendar.md](06-maintenance-calendar.md) |
-| 07 | Chat with AI assistant | 4c | Claude Code | ⚪ Pending | 02, 03, 04 | [07-ai-chat.md](07-ai-chat.md) |
+| 07 | Chat with AI assistant | 4c | Claude Code | 🔵 In progress | 02, 03, 04 | [07-ai-chat.md](07-ai-chat.md) |
 | 08 | Payments — Stripe Checkout + paywall | 5 | Claude Code | ⚪ Pending | 03, 13 | [08-payments.md](08-payments.md) |
 | 09 | Analytics + observability | 6 | Claude Code | ⚪ Pending | 02 | [09-analytics.md](09-analytics.md) |
 | 10 | Landing page — iPhone showcase + waitlist | 7 | Claude Code | 🟢 Done | — | [10-landing-page.md](10-landing-page.md) |

@@ -100,6 +100,7 @@ export interface Vendor {
 
 export type MaintenanceSource = 'manual' | 'ai_suggested' | 'voice';
 export type MaintenanceRecurrence = 'none' | 'monthly' | 'quarterly' | 'annual';
+export type MaintenanceStatus = 'scheduled' | 'completed' | 'skipped';
 
 export interface MaintenanceItem {
   id: string;
@@ -113,6 +114,7 @@ export interface MaintenanceItem {
   cost_cents: number | null;     // divide by 100 for display
   recurrence: MaintenanceRecurrence;
   source: MaintenanceSource;
+  status: MaintenanceStatus;
   created_at: string;
   updated_at: string;
 }
