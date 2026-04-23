@@ -6,7 +6,7 @@ const PROTECTED_PREFIXES = ['/dashboard', '/chat', '/assets', '/timeline', '/set
 // Routes that authenticated users shouldn't see
 const AUTH_ONLY_PREFIXES = ['/auth/signin']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const isProtected = PROTECTED_PREFIXES.some(p => pathname.startsWith(p))
