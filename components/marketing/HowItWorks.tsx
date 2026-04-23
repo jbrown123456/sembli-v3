@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { SectionHeader } from '@/components/ui/section-header'
 import { IPhoneFrame } from '@/components/ui/IPhoneFrame'
 
@@ -6,19 +7,22 @@ const beats = [
     num: '01',
     heading: "Talk, don\u2019t type.",
     body: 'Open the app. Describe what you know about your home in plain language. Sembli extracts every asset, system, and vendor — no forms, no dropdowns, no guessing.',
-    screen: '02-onboarding',
+    img: '/screenshots/onboarding-chat.jpg',
+    alt: 'Sembli chat-first onboarding screen',
   },
   {
     num: '02',
     heading: 'Get a 10-year outlook, not a checklist.',
     body: "Your dashboard is a morning brief: what\u2019s due, what\u2019s coming, what it costs. Ask a question in plain English and get a cited answer \u2014 not a generic article.",
-    screen: '03-dashboard',
+    img: '/screenshots/dashboard.jpg',
+    alt: 'Sembli dashboard and 10-year outlook screen',
   },
   {
     num: '03',
     heading: 'Every asset, every vendor, one tap.',
     body: 'Scan a business card. Forward an invoice. The people and systems that keep your home running are always one tap away — linked to the assets they work on.',
-    screen: '06-vendor-directory',
+    img: '/screenshots/vendor-profile.jpg',
+    alt: 'Sembli vendor directory screen',
   },
 ]
 
@@ -57,11 +61,13 @@ export function HowItWorks() {
 
               <div className="flex justify-center md:justify-start flex-shrink-0">
                 <IPhoneFrame size="beat">
-                  <div className="w-full h-full flex items-center justify-center" style={{ background: '#1A1814' }}>
-                    <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                      {beat.screen}
-                    </span>
-                  </div>
+                  <Image
+                    src={beat.img}
+                    alt={beat.alt}
+                    width={375}
+                    height={812}
+                    className="w-full h-full object-cover object-top"
+                  />
                 </IPhoneFrame>
               </div>
             </div>

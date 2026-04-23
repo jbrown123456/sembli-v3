@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { PostHogProvider } from "@/lib/posthog";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -46,7 +47,9 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <PostHogProvider>{children}</PostHogProvider>
+      </body>
     </html>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { submitWaitlist } from '@/app/(marketing)/actions'
+import { trackCtaSubmitted, trackWaitlistSuccess } from '@/components/marketing/Analytics'
 
 export function WaitlistSection() {
   const [email, setEmail] = useState('')
@@ -11,8 +12,10 @@ export function WaitlistSection() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setState('loading')
+    trackCtaSubmitted('footer')
     const result = await submitWaitlist(email, 'footer')
     if (result.success) {
+      trackWaitlistSuccess('footer')
       setState('success')
       setMessage(result.message)
       setEmail('')

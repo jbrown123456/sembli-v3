@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { IPhoneFrame } from '@/components/ui/IPhoneFrame'
 import { Eyebrow } from '@/components/ui/eyebrow'
 import { submitWaitlist } from '@/app/(marketing)/actions'
+import { trackCtaFocused, trackCtaSubmitted, trackWaitlistSuccess } from '@/components/marketing/Analytics'
 
 export function Hero() {
   const [email, setEmail] = useState('')
@@ -13,8 +15,10 @@ export function Hero() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setState('loading')
+    trackCtaSubmitted('hero')
     const result = await submitWaitlist(email, 'hero')
     if (result.success) {
+      trackWaitlistSuccess('hero')
       setState('success')
       setMessage(result.message)
       setEmail('')
@@ -56,6 +60,7 @@ export function Hero() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                onFocus={trackCtaFocused}
                 className="flex-1 px-4 py-3 rounded-lg text-sm outline-none font-sans"
                 style={{
                   background: 'rgba(26,24,20,0.05)',
@@ -82,11 +87,14 @@ export function Hero() {
         {/* iPhone mockup */}
         <div className="hidden md:flex justify-center mt-12 md:mt-0 flex-shrink-0">
           <IPhoneFrame size="hero">
-            <div className="w-full h-full flex items-center justify-center" style={{ background: '#1A1814' }}>
-              <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                app screenshot
-              </span>
-            </div>
+            <Image
+              src="/screenshots/onboarding-chat.jpg"
+              alt="Sembli onboarding — chat-first intake screen"
+              width={375}
+              height={812}
+              className="w-full h-full object-cover object-top"
+              priority
+            />
           </IPhoneFrame>
         </div>
 
