@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export function SignInForm() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [state, setState] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -14,8 +17,19 @@ export function SignInForm() {
     setErrorMsg('')
 
     const supabase = createClient()
-    const redirectTo = `${window.location.origin}/auth/callback`
 
+    if (password) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setState('error')
+        setErrorMsg(error.message)
+      } else {
+        router.push('/dashboard')
+      }
+      return
+    }
+
+    const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -114,6 +128,40 @@ export function SignInForm() {
         }}
       />
 
+      <label
+        htmlFor="password"
+        style={{
+          fontSize: 12,
+          fontFamily: 'var(--font-jetbrains-mono)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+          color: 'var(--almanac-muted)',
+          marginTop: 4,
+        }}
+      >
+        Password <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional — leave blank for magic link)</span>
+      </label>
+      <input
+        id="password"
+        type="password"
+        autoComplete="current-password"
+        placeholder="••••••••"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '14px 16px',
+          borderRadius: 12,
+          border: '1px solid var(--almanac-border)',
+          background: 'var(--almanac-surface)',
+          color: 'var(--almanac-ink)',
+          fontSize: 16,
+          fontFamily: 'var(--font-inter)',
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      />
+
       {state === 'error' && (
         <p style={{ fontSize: 13, color: 'var(--almanac-danger)', margin: 0 }}>
           {errorMsg || 'Something went wrong — try again.'}
@@ -139,7 +187,7 @@ export function SignInForm() {
           transition: 'opacity 0.15s ease',
         }}
       >
-        {state === 'loading' ? 'Sending…' : 'Send magic link →'}
+        {state === 'loading' ? (password ? 'Signing in…' : 'Sending…') : (password ? 'Sign in →' : 'Send magic link →')}
       </button>
     </form>
   )
