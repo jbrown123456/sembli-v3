@@ -35,7 +35,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 | 09 | Analytics + observability | 6 | Claude Code | 🟢 Done | 02 | [09-analytics.md](09-analytics.md) |
 | 10 | Landing page — iPhone showcase + waitlist | 7 | Claude Code | 🟢 Done | — | [10-landing-page.md](10-landing-page.md) |
 | 11 | Legal + production hardening | 8 | Joey + Claude Code | 🟢 Done | 03, 08 | [11-legal-hardening.md](11-legal-hardening.md) |
-| 12 | Pre-launch QA + launch | 9 | Joey + Claude Code | ⚪ Pending | 05–11 | _brief TBD_ |
+| 12 | Pre-launch QA + launch | 9 | Joey + Claude Code | 🔵 In progress | 05–11 | _brief TBD_ |
 | 13 | Decision: pricing + paywall gating | — | Joey | 🟢 Done | — | Free (1 home, 5 assets) / Pro $9mo or $79yr |
 | 14 | Decision: AI model (Claude vs. mixed) | — | Joey | 🟢 Done | — | Claude only — Opus for reasoning, Haiku for classification |
 
@@ -65,8 +65,10 @@ _None — #13 and #14 locked. Task 08 (Stripe) deprioritized until post-beta._
 
 Append-only. Newest entries at top. Agents add a one-liner when they complete a task or make a notable decision.
 
+- **2026-04-22** (Claude Code) — Task 12 QA pass. pnpm typecheck + lint clean (zero errors). Middleware: /upgrade + /onboarding added to PROTECTED_PREFIXES. ChatWindow setState-in-effect refactored. All 7 lint issues resolved. 12-qa-launch.md brief written with go/no-go checklist. Joey action required: production env vars + legal copy.
 - **2026-04-22** (Claude Code) — Task 08 complete. Stripe Checkout + Customer Portal (monthly/yearly), entitlements gate (canUseAI/assetLimit), webhook handler for subscription lifecycle events, /upgrade page + UpgradeForm, /settings page with billing management, /auth/signout route, paywall enforcement in /api/chat. pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — Task 11 complete. /privacy, /terms, /cookies pages (Section+Placeholder pattern, cross-linked). Security headers in next.config.ts (X-Frame-Options, CSP, nosniff, Referrer-Policy, Permissions-Policy). lib/rateLimit.ts centralized in-memory limiter (waitlist/auth/extraction/chat helpers). settings/page.tsx: Legal links section + Danger zone with DeleteAccountButton. BottomNav: Settings tab (gear icon, /settings). DeleteAccountButton + deleteAccount server action. pnpm typecheck clean.
+- **2026-04-22** (Claude Code) — Task 12 QA pass. pnpm typecheck + lint clean (zero errors). Middleware: /upgrade + /onboarding added to PROTECTED_PREFIXES. ChatWindow setState-in-effect refactored. All 7 lint issues resolved. 12-qa-launch.md brief written with go/no-go checklist. Joey action required: production env vars + legal copy.
 - **2026-04-22** (Claude Code) — Task 08 complete. Stripe Checkout + Customer Portal (monthly/yearly), entitlements gate (canUseAI/assetLimit), webhook handler for subscription lifecycle events, /upgrade page + UpgradeForm, /settings page with billing management, /auth/signout route, paywall enforcement in /api/chat. pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — Task 11 complete. /privacy + /terms + /cookies page shells under (marketing) layout with [PLACEHOLDER] callouts. MarketingFooter updated to real Link hrefs (+ Cookies added). Security headers in next.config.ts: X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP covering Stripe/PostHog/Supabase/Sentry. deleteAccount server action (admin client, cascade-safe). DeleteAccountButton client component (type-to-confirm modal). Settings page: Legal section + Danger Zone wired. pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — Task 09 final wiring: maintenance_event_completed (EventCard/CompleteForm), maintenance_event_added (AddEventModal), asset_created (FirstAssetForm). @vercel/analytics installed, <Analytics /> added to root layout. SignOutButton calls posthog.reset() on sign-out. pnpm typecheck clean.
