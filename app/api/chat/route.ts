@@ -159,7 +159,6 @@ export async function POST(request: NextRequest) {
 
           const toolUseBlocks: Anthropic.ToolUseBlock[] = []
           let currentToolName = ''
-          let textBuffer = ''
 
           for await (const event of response) {
             if (event.type === 'content_block_start') {
@@ -169,7 +168,6 @@ export async function POST(request: NextRequest) {
               }
             } else if (event.type === 'content_block_delta') {
               if (event.delta.type === 'text_delta') {
-                textBuffer += event.delta.text
                 fullAssistantText += event.delta.text
                 send({ type: 'text', delta: event.delta.text })
               }

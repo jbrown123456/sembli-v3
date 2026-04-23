@@ -344,10 +344,10 @@ function ScreenMagic({ address, onNext }: { address: string; onNext: () => void 
               >
                 {(
                   [
-                    ['Built', <><strong>1978</strong><Cite n={1} /></>],
-                    ['Sq ft', <><strong>1,940</strong><Cite n={1} /></>],
-                    ['Roof permit', <><strong>2011</strong><Cite n={2} /></>],
-                    ['Lot', <strong>0.24 ac</strong>],
+                    ['Built', <><strong key="v">1978</strong><Cite n={1} key="c" /></>],
+                    ['Sq ft', <><strong key="v">1,940</strong><Cite n={1} key="c" /></>],
+                    ['Roof permit', <><strong key="v">2011</strong><Cite n={2} key="c" /></>],
+                    ['Lot', <strong key="v">0.24 ac</strong>],
                   ] as [string, React.ReactNode][]
                 ).map(([label, val], i) => (
                   <div

@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes that require authentication
-const PROTECTED_PREFIXES = ['/dashboard', '/chat', '/assets', '/timeline', '/settings']
+const PROTECTED_PREFIXES = ['/dashboard', '/chat', '/assets', '/timeline', '/settings', '/upgrade', '/onboarding']
 
 // Routes that authenticated users shouldn't see (e.g. sign-in page)
 const AUTH_ONLY_PREFIXES = ['/auth/signin']

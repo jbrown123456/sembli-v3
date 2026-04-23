@@ -20,14 +20,15 @@ export function ChatWindow({
   initialConversationId,
   initialMessages,
   conversations,
-  isPro,
 }: ChatWindowProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { track } = useAnalytics()
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId)
+  // If ?new=1, start with a blank conversation (initialise lazily to avoid setState-in-effect)
+  const isNew = searchParams.get('new') === '1'
+  const [messages, setMessages] = useState<Message[]>(() => isNew ? [] : initialMessages)
+  const [conversationId, setConversationId] = useState<string | null>(() => isNew ? null : initialConversationId)
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
@@ -49,14 +50,10 @@ export function ChatWindow({
     ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`
   }, [input])
 
-  // Handle ?new=1 query param
+  // Strip ?new=1 from URL now that we've handled it in state
   useEffect(() => {
-    if (searchParams.get('new') === '1') {
-      setMessages([])
-      setConversationId(null)
-      router.replace('/chat')
-    }
-  }, [searchParams, router])
+    if (isNew) router.replace('/chat')
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = useCallback(async () => {
     const text = input.trim()
@@ -174,7 +171,7 @@ export function ChatWindow({
       setIsStreaming(false)
       abortRef.current = null
     }
-  }, [input, isStreaming, conversationId, homeId])
+  }, [input, isStreaming, conversationId, homeId, track])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

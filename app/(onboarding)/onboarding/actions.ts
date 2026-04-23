@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 
 /**
  * Called at the end of the onboarding flow (final screen CTA).
