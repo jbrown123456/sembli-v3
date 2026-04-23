@@ -29,7 +29,7 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 | 03 | Auth + accounts via Supabase Auth | 2 | Claude Code | 🟢 Done | — | [03-auth.md](03-auth.md) |
 | 04 | Data model + RLS policies | 3 | Claude Code | 🟢 Done | — | [04-data-model.md](04-data-model.md) |
 | 05 | Magic moment — onboarding → first asset (HVAC) | 4a | Claude Code | 🟢 Done | — | [05-first-asset.md](05-first-asset.md) |
-| 06 | Maintenance calendar per property | 4b | Claude Code | ⚪ Pending | 02, 03, 04 | [06-maintenance-calendar.md](06-maintenance-calendar.md) |
+| 06 | Maintenance calendar per property | 4b | Claude Code | 🟢 Done | — | [06-maintenance-calendar.md](06-maintenance-calendar.md) |
 | 07 | Chat with AI assistant | 4c | Claude Code | 🟢 Done | 02, 03, 04 | [07-ai-chat.md](07-ai-chat.md) |
 | 08 | Payments — Stripe Checkout + paywall | 5 | Claude Code | ⚪ Pending | 03, 13 | [08-payments.md](08-payments.md) |
 | 09 | Analytics + observability | 6 | Claude Code | ⚪ Pending | 02 | [09-analytics.md](09-analytics.md) |
@@ -51,8 +51,8 @@ This is the **single source of truth** for what Sembli needs to ship and the sta
 
 ## Currently active
 
-- **Task 06 — Maintenance calendar.** 🔵 In progress. Next up after 05.
-- **Tasks 01–05, 10 all complete.** Typecheck clean. E2E auth testing requires Joey to wire Supabase env vars and magic link redirect URL in the Supabase dashboard.
+- **Tasks 01–07, 10 all complete.** Core product is built — HVAC intake, timeline, AI chat all wired. Next: Task 09 (analytics) or Task 11 (legal/hardening) before beta launch.
+- **Joey action needed:** Wire Supabase env vars + magic link redirect URL, and set ANTHROPIC_API_KEY in Vercel before live testing.
 
 ## Open decisions blocking future work
 
@@ -65,6 +65,7 @@ _None — #13 and #14 locked. Task 08 (Stripe) deprioritized until post-beta._
 Append-only. Newest entries at top. Agents add a one-liner when they complete a task or make a notable decision.
 
 - **2026-04-22** (Claude Code) — Task 07 complete. Migration 0005 (conversations + messages + RLS), streaming API route `/api/chat` with agentic tool loop (5 tools: search_assets, get_asset_details, get_maintenance_history, create_maintenance_event, complete_maintenance_event), ChatWindow + MessageBubble (react-markdown) + ToolCallChip + TypingIndicator + ConversationList + UpgradePrompt components. AskSembli FAB updated to pass `?new=1`. Free tier gated behind UpgradePrompt. `pnpm typecheck` clean.
+- **2026-04-22** (Claude Code) — Tasks 05, 06, 07 complete. First-asset HVAC intake with Claude Vision, real maintenance timeline, streaming AI chat with 5 tools (search, details, history, create, complete). pnpm typecheck clean.
 - **2026-04-22** (Claude Code) — All briefs drafted: 03-auth, 05-first-asset (HVAC), 06-maintenance-calendar, 07-ai-chat, 08-payments, 09-analytics, 11-legal-hardening. Decisions #13 (pricing) and #14 (AI model) locked. Task 03 claimed.
 - **2026-04-22** (Claude Code) — Task 10 marked Done. All B1–B8 complete; B9 (Lighthouse) deferred until live Vercel URL exists.
 - **2026-04-22** (Claude Code) — Task 02 complete. App shell (`(app)` route group, `AppHeader`, `BottomNav`, `AskSembli` FAB), Chat-first Onboarding ported to Next.js (`/onboarding`, 5 screens), stub pages for `/dashboard`, `/chat`, `/assets`, `/timeline`. Almanac light palette CSS vars added to `globals.css`. `pnpm typecheck` clean.
