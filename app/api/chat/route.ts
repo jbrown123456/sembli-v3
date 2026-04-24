@@ -36,7 +36,7 @@ Today's date: ${today}`
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-// Simple in-memory rate limit: 30 msg/hr per user
+// In-memory rate limit: 1000 msg/hr per user (high cap for dogfooding)
 const rateLimits = new Map<string, { count: number; resetAt: number }>()
 function checkRateLimit(userId: string): boolean {
   const now = Date.now()
@@ -45,7 +45,7 @@ function checkRateLimit(userId: string): boolean {
     rateLimits.set(userId, { count: 1, resetAt: now + 60 * 60 * 1000 })
     return true
   }
-  if (entry.count >= 30) return false
+  if (entry.count >= 1000) return false
   entry.count++
   return true
 }
