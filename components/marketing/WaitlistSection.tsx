@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { submitWaitlist } from '@/app/(marketing)/actions'
 import { trackCtaSubmitted, trackWaitlistSuccess } from '@/components/marketing/Analytics'
+import { useWaitlist } from '@/components/marketing/WaitlistContext'
 
 export function WaitlistSection() {
   const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
+  const { state, message, setState, setMessage } = useWaitlist()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

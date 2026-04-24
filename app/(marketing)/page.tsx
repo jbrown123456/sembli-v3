@@ -5,10 +5,11 @@ import { AppShowcase } from '@/components/marketing/AppShowcase'
 import { WaitlistSection } from '@/components/marketing/WaitlistSection'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { LandingAnalytics } from '@/components/marketing/Analytics'
+import { WaitlistProvider } from '@/components/marketing/WaitlistContext'
 
 export default function LandingPage() {
   return (
-    <>
+    <WaitlistProvider>
       <LandingAnalytics />
       <Hero />
       <Thesis />
@@ -16,6 +17,6 @@ export default function LandingPage() {
       <AppShowcase />
       <WaitlistSection />
       <MarketingFooter />
-    </>
+    </WaitlistProvider>
   )
 }

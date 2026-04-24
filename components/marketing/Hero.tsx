@@ -6,11 +6,11 @@ import { IPhoneFrame } from '@/components/ui/IPhoneFrame'
 import { Eyebrow } from '@/components/ui/eyebrow'
 import { submitWaitlist } from '@/app/(marketing)/actions'
 import { trackCtaFocused, trackCtaSubmitted, trackWaitlistSuccess } from '@/components/marketing/Analytics'
+import { useWaitlist } from '@/components/marketing/WaitlistContext'
 
 export function Hero() {
   const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
+  const { state, message, setState, setMessage } = useWaitlist()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

@@ -15,7 +15,7 @@ export function AppShowcase() {
       <div className="max-w-6xl mx-auto">
         <SectionHeader
           eyebrow="The app"
-          heading={<>Everything your home needs,<br /><em style={{ fontStyle: 'italic', color: '#B8860B' }}>in your pocket.</em></>}
+          heading={<>Everything your home needs,{' '}<br /><em style={{ fontStyle: 'italic', color: '#B8860B' }}>in your pocket.</em></>}
           className="mb-16"
         />
 
