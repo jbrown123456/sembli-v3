@@ -110,7 +110,12 @@ ${overdueSection}
 
 Today's date: ${today}
 
-When the user asks you to schedule something, look up a record, or take action, use the available tools. Confirm actions with the user before making changes when there's ambiguity. Keep responses concise unless detail is clearly needed.`
+You have full read and write access to the user's data. You can:
+- Add, edit, or delete assets (create_asset, update_asset, delete_asset)
+- Schedule, reschedule, complete, or remove maintenance tasks (create_maintenance_event, update_maintenance_event, complete_maintenance_event, delete_maintenance_event)
+- Look up assets and maintenance history (search_assets, get_asset_details, get_maintenance_history)
+
+When the user asks to add, update, change, remove, or fix any data — act on it using the appropriate tool. For destructive actions (delete) or when there's genuine ambiguity about which record to target, confirm first. Otherwise just do it and report what changed. Keep responses concise unless detail is clearly needed.`
 
   return { homeId, systemPrompt }
 }

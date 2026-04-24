@@ -6,6 +6,11 @@ const TOOL_LABELS: Record<string, string> = {
   get_maintenance_history: 'Checking maintenance history',
   create_maintenance_event: 'Scheduling maintenance',
   complete_maintenance_event: 'Marking as complete',
+  update_maintenance_event: 'Updating maintenance task',
+  delete_maintenance_event: 'Removing maintenance task',
+  create_asset: 'Adding asset',
+  update_asset: 'Updating asset',
+  delete_asset: 'Removing asset',
 }
 
 interface ToolCallChipProps {

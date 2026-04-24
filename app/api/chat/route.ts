@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
             // Execute tools and collect results
             const toolResultContent: Anthropic.ToolResultBlockParam[] = []
             for (const toolBlock of toolUseBlocks) {
-              const result = await executeTool(toolBlock.name, toolBlock.input as Record<string, unknown>)
+              const result = await executeTool(toolBlock.name, toolBlock.input as Record<string, unknown>, supabase)
               send({ type: 'tool_end', toolName: toolBlock.name, result })
 
               toolResultContent.push({

@@ -42,7 +42,7 @@ export default function SignInPage() {
           margin: '0 0 32px',
         }}
       >
-        Enter your email and we&apos;ll send you a magic link — no password needed.
+        Enter your email to get a magic link, or add your password to sign in directly.
       </p>
 
       <SignInForm />

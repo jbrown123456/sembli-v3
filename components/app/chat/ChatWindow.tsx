@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageBubble, type Message, type ToolCall } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
@@ -40,9 +40,9 @@ export function ChatWindow({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const abortRef = useRef<AbortController | null>(null)
-  // Stable ref so send() always reads the latest messages without stale closure issues
   const messagesRef = useRef(messages)
-  messagesRef.current = messages
+  // Stable ref so send() always reads the latest messages without stale closure issues
+  useLayoutEffect(() => { messagesRef.current = messages })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

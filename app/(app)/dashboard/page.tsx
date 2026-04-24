@@ -81,7 +81,7 @@ function AssetCard({ asset }: { asset: Asset }) {
       : 'var(--almanac-accent)'
 
   return (
-    <Link href="/assets" style={{ textDecoration: 'none' }}>
+    <Link href={`/assets/${asset.id}`} style={{ textDecoration: 'none' }}>
       <div
         style={{
           background: 'var(--almanac-surface)',
